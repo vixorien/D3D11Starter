@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include "mesh.h"
 #include <d3d11.h>
 #include <string>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects

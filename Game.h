@@ -1,5 +1,5 @@
 #pragma once
-
+#include <memory>
 #include "DXCore.h"
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
@@ -20,6 +20,10 @@ public:
 	void Draw(float deltaTime, float totalTime);
 
 private:
+	//creating our 3 meshes for our shapes
+	std::shared_ptr<Mesh> shapeOne;
+	std::shared_ptr<Mesh> shapeTwo;
+	std::shared_ptr<Mesh> shapeThree;
 
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
@@ -33,9 +37,7 @@ private:
 	//    Component Object Model, which DirectX objects do
 	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
 
-	// Buffers to hold actual geometry data
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+
 	
 	// Shaders and shader-related constructs
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
