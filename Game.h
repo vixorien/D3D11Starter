@@ -24,7 +24,7 @@ private:
 	std::shared_ptr<Mesh> shapeOne;
 	std::shared_ptr<Mesh> shapeTwo;
 	std::shared_ptr<Mesh> shapeThree;
-
+	Microsoft::WRL::ComPtr<ID3D11Buffer> vsConstantBuffer;
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
 

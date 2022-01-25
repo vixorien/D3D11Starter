@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Vertex.h"
 #include "Input.h"
+#include "BufferStructs.h"
 
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
@@ -58,11 +59,28 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	CreateBasicGeometry();
-	
+
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// Get size as the next multiple of 16 (instead of hardcoding a size here!)  
+	unsigned int size = sizeof(VertexShaderExternalData);
+	size = (size + 15) / 16 * 16;
+	// This will work even if your struct size changes
+
+	// Describe the constant buffer  
+	D3D11_BUFFER_DESC cbDesc = {};
+	// Sets struct to all zeros  
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.ByteWidth = size;
+	// Must be a multiple of 16  
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+
+	//creating buffer
+	device->CreateBuffer(&cbDesc, 0, vsConstantBuffer.GetAddressOf());
 }
 
 // --------------------------------------------------------
@@ -175,7 +193,7 @@ void Game::CreateBasicGeometry()
 	unsigned int indices[] = { 0, 1, 2 };
 
 	//creating our first shape
-	shapeOne = std::make_shared<Mesh>(vertices,3,indices,3,device,context);
+	shapeOne = std::make_shared<Mesh>(vertices, 3, indices, 3, device, context);
 
 	//vertices and indices for second shape with creation
 	Vertex verticesForSecondShape[] =
@@ -241,7 +259,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		1.0f,
 		0);
 
-
+	//
 	// Set the vertex and pixel shaders to use for the next Draw() command
 	//  - These don't technically need to be set every frame
 	//  - Once you start applying different shaders to different objects,
@@ -256,6 +274,24 @@ void Game::Draw(float deltaTime, float totalTime)
 	//    this could simply be done once in Init()
 	// - However, this isn't always the case (but might be for this course)
 	context->IASetInputLayout(inputLayout.Get());
+
+	//creating data to send to constant buffer
+	VertexShaderExternalData vsData;
+	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
+	vsData.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
+
+	//copying over to the resource
+	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
+	context->Map(vsConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
+	context->Unmap(vsConstantBuffer.Get(), 0);
+
+	//binding a constant buffer
+	context->VSSetConstantBuffers(
+		0, // Which slot (register) to bind the buffer to?  
+		1, // How many are we activating?  Can do multiple at once  
+		vsConstantBuffer.GetAddressOf());// Array of buffers (or the address of one)
+
 
 
 	// Set buffers in the input assembler
