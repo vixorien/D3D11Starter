@@ -25,6 +25,8 @@ Game::Game(HINSTANCE hInstance)
 		1280,			   // Width of the window's client area
 		720,			   // Height of the window's client area
 		true),			   // Show extra stats (fps) in title bar?
+	//call transform constructor
+	transform(),
 	vsync(false)
 {
 #if defined(DEBUG) || defined(_DEBUG)
@@ -239,6 +241,17 @@ void Game::Update(float deltaTime, float totalTime)
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//using sin so it fluctiates shouldnt disappear
+	transform.SetPosition(sin(totalTime), 0, 0);
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//create a scale to pass in
+	float scale = cos(totalTime);
+	//pass it in
+	transform.SetScale(scale, scale, scale);
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	transform.Rotate(0, 0, deltaTime * 0.1f);
 }
 
 // --------------------------------------------------------
@@ -278,7 +291,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//creating data to send to constant buffer
 	VertexShaderExternalData vsData;
 	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
-	vsData.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
+	vsData.worldMatrix = transform.BuildMatrix();
 
 	//copying over to the resource
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};

@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "DXCore.h"
+#include "Transform.h"
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 
@@ -18,6 +19,8 @@ public:
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
+
+	
 
 private:
 	//creating our 3 meshes for our shapes
@@ -43,6 +46,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+	Transform transform;
 
 };
 
