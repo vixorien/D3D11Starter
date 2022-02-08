@@ -1,9 +1,6 @@
 #pragma once
-#include <memory>
 #include "DXCore.h"
-#include "Transform.h"
-#include <DirectXMath.h>
-#include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+
 
 class Game 
 	: public DXCore
@@ -19,11 +16,12 @@ public:
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
-
+	//creating our 3 meshes for our shapes
+	
 	
 
 private:
-	//creating our 3 meshes for our shapes
+	
 	std::shared_ptr<Mesh> shapeOne;
 	std::shared_ptr<Mesh> shapeTwo;
 	std::shared_ptr<Mesh> shapeThree;

@@ -2,14 +2,21 @@
 #include "Vertex.h"
 #include "Input.h"
 #include "BufferStructs.h"
-
+#include <vector>
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
 #include <d3dcompiler.h>
 
 // For the DirectX Math library
 using namespace DirectX;
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//creating this here because my  program is shitting the bed when it goes into the .h
+std::vector<GameEntity> listOfEntitys;
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 // --------------------------------------------------------
 // Constructor
 //
@@ -83,6 +90,9 @@ void Game::Init()
 
 	//creating buffer
 	device->CreateBuffer(&cbDesc, 0, vsConstantBuffer.GetAddressOf());
+	
+	//creating my 5 game entitys
+
 }
 
 // --------------------------------------------------------
@@ -220,6 +230,21 @@ void Game::CreateBasicGeometry()
 	};
 	unsigned int indicesForThirdShape[] = { 1,0,2,1,2,4,1,4,3 };
 	shapeThree = std::make_shared<Mesh>(verticesForThirdShape, 5, indicesForThirdShape, 9, device, context);
+
+
+	//creating our 5 entitys
+	GameEntity entityOne = GameEntity(shapeOne.get());
+	GameEntity entityTwo = GameEntity(shapeTwo.get());
+	GameEntity entityThree = GameEntity(shapeThree.get());
+	GameEntity entityFour = GameEntity(shapeOne.get());
+	GameEntity entityFive = GameEntity(shapeTwo.get());
+	//creating something to hold our entitys
+	
+	listOfEntitys.push_back(entityOne);
+	listOfEntitys.push_back(entityTwo);
+	listOfEntitys.push_back(entityThree);
+	listOfEntitys.push_back(entityFour);
+	listOfEntitys.push_back(entityFive);
 }
 
 
@@ -241,17 +266,14 @@ void Game::Update(float deltaTime, float totalTime)
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//using sin so it fluctiates shouldnt disappear
-	transform.SetPosition(sin(totalTime), 0, 0);
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//create a scale to pass in
-	float scale = cos(totalTime);
-	//pass it in
-	transform.SetScale(scale, scale, scale);
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	transform.Rotate(0, 0, deltaTime * 0.1f);
+
+	
+	listOfEntitys[0].getTransform()->SetPosition(sin(totalTime), 0, 0);
+	listOfEntitys[1].getTransform()->SetPosition(cos(totalTime), 0, 0);
+	listOfEntitys[2].getTransform()->SetPosition(tan(totalTime), 0, 0);
+	listOfEntitys[3].getTransform()->SetScale(3, 3, 1);
+	listOfEntitys[4].getTransform()->Rotate(0,0,deltaTime*.1f);
 }
 
 // --------------------------------------------------------
@@ -287,7 +309,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//    this could simply be done once in Init()
 	// - However, this isn't always the case (but might be for this course)
 	context->IASetInputLayout(inputLayout.Get());
-
+	/*
 	//creating data to send to constant buffer
 	VertexShaderExternalData vsData;
 	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
@@ -298,7 +320,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->Map(vsConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
 	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
 	context->Unmap(vsConstantBuffer.Get(), 0);
-
+	*/
 	//binding a constant buffer
 	context->VSSetConstantBuffers(
 		0, // Which slot (register) to bind the buffer to?  
@@ -315,25 +337,18 @@ void Game::Draw(float deltaTime, float totalTime)
 	//    in a larger application/game
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	/*
-	context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-
-	// Finally do the actual drawing
-	//  - Do this ONCE PER OBJECT you intend to draw
-	//  - This will use all of the currently set DirectX "stuff" (shaders, buffers, etc)
-	//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-	//     vertices in the currently set VERTEX BUFFER
-	context->DrawIndexed(
-		3,     // The number of indices to use (we could draw a subset if we wanted)
-		0,     // Offset to the first index we want to use
-		0);    // Offset to add to each index when looking up vertices
-	*/
 	//call the draw fuction on each of our 3 meshes
+	/*
 	shapeOne->Draw();
 	shapeTwo->Draw();
 	shapeThree->Draw();
+	*/
+	//loop through and draw our entitys
+	for (int i = 0; i < listOfEntitys.size(); i++) {
+		listOfEntitys[i].Draw(vsConstantBuffer,context);
+	}
+
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
