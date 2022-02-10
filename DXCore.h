@@ -7,6 +7,7 @@
 #include <DirectXMath.h>
 #include <string>
 #include "GameEntity.h"
+#include "Camera.h"
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 
 // We can include the correct library files here

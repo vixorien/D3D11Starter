@@ -9,6 +9,7 @@ public:
 	DirectX::XMFLOAT4X4 BuildMatrix();
 
 	void MoveAbsolute(float x, float y, float z);
+	void MoveRelative(float x, float y, float z);
 	void Rotate(float p, float y, float r);
 	void Scale(float x, float y, float z);
 

@@ -41,6 +41,7 @@ Game::Game(HINSTANCE hInstance)
 	CreateConsoleWindow(500, 120, 32, 120);
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
+	camera = std::make_shared<Camera>(0.0f, 0.0f, -5.0f, (float)width / height);
 }
 
 // --------------------------------------------------------
@@ -346,7 +347,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	*/
 	//loop through and draw our entitys
 	for (int i = 0; i < listOfEntitys.size(); i++) {
-		listOfEntitys[i].Draw(vsConstantBuffer,context);
+		listOfEntitys[i].Draw(vsConstantBuffer,context,camera);
 	}
 
 	// Present the back buffer to the user

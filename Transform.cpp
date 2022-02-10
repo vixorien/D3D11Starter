@@ -54,6 +54,23 @@ void Transform::MoveAbsolute(float x, float y, float z)
 	*/
 }
 
+void Transform::MoveRelative(float x, float y, float z)
+{
+	//load the movment vector(initial)
+	XMVECTOR moveVec = XMVectorSet(x, y, z, 0);
+
+	//needs a quarternion and a vector
+	XMVECTOR rotatedVec = XMVector3Rotate(moveVec, XMQuaternionRotationRollPitchYaw(pitchYallRoll.x, pitchYallRoll.y, pitchYallRoll.z));
+
+	//add the rotated movement vector to my position and overwrite my old position
+	XMVECTOR newPos = XMLoadFloat3(&position) + rotatedVec;
+	XMStoreFloat3(&position, newPos);
+
+	//remember the matrixes are dirty
+	matrixDirty = true;
+
+}
+
 void Transform::Rotate(float p, float y, float r)
 {
 	pitchYallRoll.x += p;
