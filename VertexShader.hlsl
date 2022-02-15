@@ -1,4 +1,4 @@
-
+//describing layout of a chunk of memory
 cbuffer ExternalData : register(b0)
 {
 	float4 colorTint;

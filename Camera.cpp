@@ -1,5 +1,5 @@
 #include "Camera.h"
-
+#include "Input.h"
 using namespace DirectX;
 
 Camera::Camera(float x, float y, float z, float aspectRatio)
@@ -15,6 +15,45 @@ Camera::~Camera()
 
 void Camera::Update(float dt)
 {
+	//cameras speed
+	float speed = dt * 5.0f;
+
+	//take in the user input
+	Input& input = Input::GetInstance();
+
+	//handle speed now
+	if (input.KeyDown(VK_SHIFT)) { speed *= 5.0f; }
+	if (input.KeyDown(VK_CONTROL)) { speed *= 0.1f; }
+
+	//basic movements
+	if (input.KeyDown('W')) { transform.MoveRelative(0, 0, speed); }
+	if (input.KeyDown('A')) { transform.MoveRelative(-speed, 0, 0); }
+	if (input.KeyDown('S')) { transform.MoveRelative(0, 0, -speed); }
+	if (input.KeyDown('D')) { transform.MoveRelative(speed, 0, 0); }
+
+	//up and down strafing
+	if (input.KeyDown('X')) { transform.MoveAbsolute(0, -speed, 0); }
+	if (input.KeyDown('Z')) { transform.MoveAbsolute(0, speed, 0); }
+
+	//side to side strafing
+	if (input.KeyDown('Q')) { transform.MoveAbsolute(-speed, 0, 0); }
+	if (input.KeyDown('E')) { transform.MoveAbsolute(speed,0 , 0); }
+	
+	//handle mouse movement only when the left mouse button is down
+	if (input.MouseLeftDown()) {
+		
+		float lookSpeed = dt * 5.0f;
+
+		float xDiff = input.GetMouseXDelta() * lookSpeed;
+		float yDiff = input.GetMouseYDelta() * lookSpeed;
+
+		//now rotate the transform
+		transform.Rotate(yDiff, xDiff, 0);
+		
+	}
+
+	//make sure we send a call to update our view matrix
+	UpdateViewMatrix();
 }
 
 void Camera::UpdateViewMatrix()
@@ -28,7 +67,7 @@ void Camera::UpdateViewMatrix()
 		XMQuaternionRotationRollPitchYaw(rot.x, rot.y, rot.z));
 
 
-	XMMATRIX view = XMMatrixLookAtLH(
+	XMMATRIX view = XMMatrixLookToLH(
 		XMLoadFloat3(&pos),
 		forward,
 		XMLoadFloat3(&up));
@@ -42,7 +81,7 @@ void Camera::UpdateProjectionMatrix(float aspectRatio)
 {
 	//creating our projection matrix
 	XMMATRIX proj = XMMatrixPerspectiveFovLH(
-		XM_PIDIV4,
+		XM_PIDIV2,
 		aspectRatio,
 		0.01f,  //near plane
 		100.0f //far plane

@@ -1,7 +1,10 @@
 #pragma once
+#include "Mesh.h"
+#include "Camera.h"
+#include "GameEntity.h"
 #include "DXCore.h"
-
-
+#include <memory>
+#include <vector>
 class Game 
 	: public DXCore
 {
@@ -21,7 +24,8 @@ public:
 	
 
 private:
-	
+	std::vector<GameEntity*> listOfEntitys;
+
 	std::shared_ptr<Mesh> shapeOne;
 	std::shared_ptr<Mesh> shapeTwo;
 	std::shared_ptr<Mesh> shapeThree;

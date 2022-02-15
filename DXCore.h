@@ -1,14 +1,10 @@
 #pragma once
 #include <memory>
 #include <Windows.h>
-#include "mesh.h"
 #include <d3d11.h>
-#include "Transform.h"
 #include <DirectXMath.h>
 #include <string>
-#include "GameEntity.h"
-#include "Camera.h"
-#include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+#include <wrl/client.h> 
 
 // We can include the correct library files here
 // instead of in Visual Studio settings if we want

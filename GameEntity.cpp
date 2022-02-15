@@ -1,5 +1,7 @@
 #include "GameEntity.h"
 #include "BufferStructs.h"
+#include "Camera.h"
+#include <iostream>
 GameEntity::GameEntity(Mesh* mesh)
 {
     entitysMesh = mesh;
@@ -21,12 +23,10 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11Buffer> vsConstantBuffer, Mic
 	///////////////////////////////////////////////////////////////
 
 
-
-
     vsData.worldMatrix = entitysTransform.BuildMatrix();
 	vsData.viewMatrix = camera->GetViewMatrix();
 	vsData.projectionMatrix = camera->GetprojectionMatrix();
-
+	//vsData.colorTint = camera
 	//copy over data and map it so lock it off from our c++ code
 	D3D11_MAPPED_SUBRESOURCE mapBuffer = {};
 	context->Map(vsConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapBuffer);

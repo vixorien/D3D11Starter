@@ -1,6 +1,5 @@
 #include "DXCore.h"
 #include "Input.h"
-
 #include <WindowsX.h>
 #include <sstream>
 

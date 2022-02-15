@@ -1,22 +1,15 @@
 #include "Game.h"
+#include "DXCore.h"
 #include "Vertex.h"
 #include "Input.h"
+#include "d3dcompiler.h"
 #include "BufferStructs.h"
-#include <vector>
+#include "GameEntity.h"
+
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
-#include <d3dcompiler.h>
-
 // For the DirectX Math library
 using namespace DirectX;
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-//creating this here because my  program is shitting the bed when it goes into the .h
-std::vector<GameEntity> listOfEntitys;
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 // --------------------------------------------------------
 // Constructor
 //
@@ -41,7 +34,7 @@ Game::Game(HINSTANCE hInstance)
 	CreateConsoleWindow(500, 120, 32, 120);
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
-	camera = std::make_shared<Camera>(0.0f, 0.0f, -5.0f, (float)width / height);
+	
 }
 
 // --------------------------------------------------------
@@ -55,6 +48,10 @@ Game::~Game()
 	// we don't need to explicitly clean up those DirectX objects
 	// - If we weren't using smart pointers, we'd need
 	//   to call Release() on each DirectX object created in Game
+	
+	//make sure we offload our entities in our constructor
+	for (auto& e : listOfEntitys) { delete e; }
+
 
 }
 
@@ -92,7 +89,9 @@ void Game::Init()
 	//creating buffer
 	device->CreateBuffer(&cbDesc, 0, vsConstantBuffer.GetAddressOf());
 	
-	//creating my 5 game entitys
+	//create our camera
+	camera = std::make_shared<Camera>(0.0f, 0.0f, -5.0f, (float)width / height);
+
 
 }
 
@@ -234,11 +233,11 @@ void Game::CreateBasicGeometry()
 
 
 	//creating our 5 entitys
-	GameEntity entityOne = GameEntity(shapeOne.get());
-	GameEntity entityTwo = GameEntity(shapeTwo.get());
-	GameEntity entityThree = GameEntity(shapeThree.get());
-	GameEntity entityFour = GameEntity(shapeOne.get());
-	GameEntity entityFive = GameEntity(shapeTwo.get());
+	GameEntity* entityOne = new GameEntity(shapeOne.get());
+	GameEntity* entityTwo =  new GameEntity(shapeTwo.get());
+	GameEntity* entityThree =new  GameEntity(shapeThree.get());
+	GameEntity* entityFour =new GameEntity(shapeOne.get());
+	GameEntity* entityFive =new GameEntity(shapeTwo.get());
 	//creating something to hold our entitys
 	
 	listOfEntitys.push_back(entityOne);
@@ -257,6 +256,8 @@ void Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
+	//make sure we update our projection matrix when the screen resizes
+	camera->UpdateProjectionMatrix((float)this->width / this->height);
 }
 
 // --------------------------------------------------------
@@ -270,11 +271,14 @@ void Game::Update(float deltaTime, float totalTime)
 
 
 	
-	listOfEntitys[0].getTransform()->SetPosition(sin(totalTime), 0, 0);
-	listOfEntitys[1].getTransform()->SetPosition(cos(totalTime), 0, 0);
-	listOfEntitys[2].getTransform()->SetPosition(tan(totalTime), 0, 0);
-	listOfEntitys[3].getTransform()->SetScale(3, 3, 1);
-	listOfEntitys[4].getTransform()->Rotate(0,0,deltaTime*.1f);
+	listOfEntitys[0]->getTransform()->SetPosition(sin(totalTime), 0, 0);
+	listOfEntitys[1]->getTransform()->SetPosition(cos(totalTime), 0, 0);
+	listOfEntitys[2]->getTransform()->SetPosition(tan(totalTime), 0, 0);
+	listOfEntitys[3]->getTransform()->SetScale(3, 3, 1);
+	listOfEntitys[4]->getTransform()->Rotate(0,0,deltaTime*.1f);
+
+	//make sure we update our camera
+	camera->Update(deltaTime);
 }
 
 // --------------------------------------------------------
@@ -310,18 +314,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//    this could simply be done once in Init()
 	// - However, this isn't always the case (but might be for this course)
 	context->IASetInputLayout(inputLayout.Get());
-	/*
-	//creating data to send to constant buffer
-	VertexShaderExternalData vsData;
-	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
-	vsData.worldMatrix = transform.BuildMatrix();
-
-	//copying over to the resource
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	context->Map(vsConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
-	context->Unmap(vsConstantBuffer.Get(), 0);
-	*/
+	
 	//binding a constant buffer
 	context->VSSetConstantBuffers(
 		0, // Which slot (register) to bind the buffer to?  
@@ -336,18 +329,15 @@ void Game::Draw(float deltaTime, float totalTime)
 	//  - for this demo, this step *could* simply be done once during Init(),
 	//    but I'm doing it here because it's often done multiple times per frame
 	//    in a larger application/game
+	/*
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-
-	//call the draw fuction on each of our 3 meshes
-	/*
-	shapeOne->Draw();
-	shapeTwo->Draw();
-	shapeThree->Draw();
 	*/
+
+
 	//loop through and draw our entitys
 	for (int i = 0; i < listOfEntitys.size(); i++) {
-		listOfEntitys[i].Draw(vsConstantBuffer,context,camera);
+		listOfEntitys[i]->Draw(vsConstantBuffer,context,camera);
 	}
 
 	// Present the back buffer to the user
