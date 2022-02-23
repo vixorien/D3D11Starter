@@ -5,6 +5,8 @@
 #include "DXCore.h"
 #include <memory>
 #include <vector>
+#include "SimpleShader.h"
+#include "Material.h"
 class Game 
 	: public DXCore
 {
@@ -25,12 +27,21 @@ public:
 
 private:
 	std::vector<GameEntity*> listOfEntitys;
-
+	//shapes and meshes
 	std::shared_ptr<Mesh> shapeOne;
 	std::shared_ptr<Mesh> shapeTwo;
 	std::shared_ptr<Mesh> shapeThree;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vsConstantBuffer;
+	//transform
+	Transform transform;
+	//camera
 	std::shared_ptr<Camera> camera;
+	//shaders
+	std::shared_ptr<SimplePixelShader> pixelShader;
+	std::shared_ptr<SimpleVertexShader> vertexShader;
+	//materials
+	std::shared_ptr<Material> mat1;
+	std::shared_ptr<Material> mat2;
+	std::shared_ptr<Material> mat3;
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
 
@@ -38,18 +49,9 @@ private:
 	void LoadShaders(); 
 	void CreateBasicGeometry();
 
-	// Note the usage of ComPtr below
-	//  - This is a smart pointer for objects that abide by the
-	//    Component Object Model, which DirectX objects do
-	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
-
+	
 
 	
-	// Shaders and shader-related constructs
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
-	Transform transform;
 
 
 };

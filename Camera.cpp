@@ -102,7 +102,7 @@ DirectX::XMFLOAT4X4 Camera::GetViewMatrix()
 	return viewMatrix;
 }
 
-DirectX::XMFLOAT4X4 Camera::GetprojectionMatrix()
+DirectX::XMFLOAT4X4 Camera::GetProjectionMatrix()
 {
 	return projectionMatrix;
 }
