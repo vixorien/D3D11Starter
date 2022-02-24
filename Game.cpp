@@ -111,7 +111,7 @@ void Game::CreateBasicGeometry()
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
 	
-
+	/*
 	//creating our 5 entitys
 	GameEntity* entityOne = new GameEntity(shapeOne.get(),mat1);
 	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat2);
@@ -125,6 +125,7 @@ void Game::CreateBasicGeometry()
 	listOfEntitys.push_back(entityThree);
 	listOfEntitys.push_back(entityFour);
 	listOfEntitys.push_back(entityFive);
+	*/
 }
 
 
@@ -149,12 +150,13 @@ void Game::Update(float deltaTime, float totalTime)
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
 
-
+	/*
 	listOfEntitys[0]->getTransform()->SetPosition(sin(totalTime), 0, 0);
 	listOfEntitys[1]->getTransform()->SetPosition(cos(totalTime), 0, 0);
 	listOfEntitys[2]->getTransform()->SetPosition(tan(totalTime), 0, 0);
 	listOfEntitys[3]->getTransform()->SetScale(3, 3, 1);
 	listOfEntitys[4]->getTransform()->Rotate(0, 0, deltaTime * .1f);
+	*/
 	//make sure we update our camera
 	camera->Update(deltaTime);
 }
@@ -176,12 +178,12 @@ void Game::Draw(float deltaTime, float totalTime)
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-
+	/*
 	//loop through and draw our entitys
 	for (int i = 0; i < listOfEntitys.size(); i++) {
 		listOfEntitys[i]->Draw(context, camera);
 	}
-
+	*/
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
