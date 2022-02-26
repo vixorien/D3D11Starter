@@ -30,6 +30,7 @@ struct VertexToPixel
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	return float4(input.uv, 0, 1);
+	//return float4(input.uv, 0, 1);
 	//return float4(colorTint, 1);
+	return tan(float4(input.uv.x/input.normal.x, input.uv.y / input.normal.y, input.screenPosition.x, 1)); // Returns purple (or another color of your choice)
 }

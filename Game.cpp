@@ -67,9 +67,9 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 
-	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT4(.5,.5,.5,0));
-	mat2 = std::make_shared<Material>(vertexShader, pixelShader, XMFLOAT4(1,1,0,0));
-	mat3 = std::make_shared<Material>(vertexShader, pixelShader, XMFLOAT4(.69,.69,.69,0));
+	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(.5,.5,.5));
+	mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1,1,0));
+
 	CreateBasicGeometry();
 
 	// Tell the input assembler stage of the pipeline what kind of
@@ -99,6 +99,7 @@ void Game::LoadShaders()
 {
 	vertexShader = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"VertexShader.cso").c_str());
 	pixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"PixelShader.cso").c_str());
+	pixelShader2 = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"CustomPS.cso").c_str());
 }
 
 
@@ -110,22 +111,30 @@ void Game::CreateBasicGeometry()
 {
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
+	shapeOne = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device,context);
+	shapeTwo = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/torus.obj").c_str(), device,context);
+	shapeThree = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device,context);
 	
-	/*
 	//creating our 5 entitys
 	GameEntity* entityOne = new GameEntity(shapeOne.get(),mat1);
-	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat2);
-	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat1);
-	GameEntity* entityFour = new GameEntity(shapeOne.get(),mat3);
-	GameEntity* entityFive = new GameEntity(shapeTwo.get(),mat1);
-	//creating something to hold our entitys
-
+	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat1);
+	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat2);
+	GameEntity* entityFour = new GameEntity(shapeThree.get(),mat2);
+	GameEntity* entityFive = new GameEntity(shapeThree.get(),mat2);
+	
+	//pushing entitys to list
 	listOfEntitys.push_back(entityOne);
 	listOfEntitys.push_back(entityTwo);
 	listOfEntitys.push_back(entityThree);
 	listOfEntitys.push_back(entityFour);
 	listOfEntitys.push_back(entityFive);
-	*/
+	
+	//making sure we put them in a good spot
+	listOfEntitys[0]->getTransform()->SetPosition(0, 0, 0);
+	listOfEntitys[1]->getTransform()->SetPosition(-2.5, 0, 0);
+	listOfEntitys[2]->getTransform()->SetPosition(2.5, 0, 0);
+	listOfEntitys[3]->getTransform()->SetPosition(-5.5, 0, 0);
+	listOfEntitys[4]->getTransform()->SetPosition(5.5, 0, 0);
 }
 
 
@@ -150,13 +159,6 @@ void Game::Update(float deltaTime, float totalTime)
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
 
-	/*
-	listOfEntitys[0]->getTransform()->SetPosition(sin(totalTime), 0, 0);
-	listOfEntitys[1]->getTransform()->SetPosition(cos(totalTime), 0, 0);
-	listOfEntitys[2]->getTransform()->SetPosition(tan(totalTime), 0, 0);
-	listOfEntitys[3]->getTransform()->SetScale(3, 3, 1);
-	listOfEntitys[4]->getTransform()->Rotate(0, 0, deltaTime * .1f);
-	*/
 	//make sure we update our camera
 	camera->Update(deltaTime);
 }
@@ -178,12 +180,12 @@ void Game::Draw(float deltaTime, float totalTime)
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-	/*
+	
 	//loop through and draw our entitys
 	for (int i = 0; i < listOfEntitys.size(); i++) {
 		listOfEntitys[i]->Draw(context, camera);
 	}
-	*/
+	
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)

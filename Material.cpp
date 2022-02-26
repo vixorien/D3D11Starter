@@ -1,6 +1,6 @@
 #include "Material.h"
 //set everything up
-Material::Material(std::shared_ptr<SimpleVertexShader> vertexShader, std::shared_ptr<SimplePixelShader> pixelShader, XMFLOAT4 colorTint)
+Material::Material(std::shared_ptr<SimpleVertexShader> vertexShader, std::shared_ptr<SimplePixelShader> pixelShader, XMFLOAT3 colorTint)
 {
 	SetColorTint(colorTint);
 	SetVertexShader(vertexShader);
@@ -22,7 +22,7 @@ std::shared_ptr<SimpleVertexShader> Material::GetVertexShader()
 	return vertexShader;
 }
 
-XMFLOAT4 Material::GetColorTint()
+XMFLOAT3 Material::GetColorTint()
 {
 	return colorTint;
 }
@@ -37,7 +37,7 @@ void Material::SetVertexShader(std::shared_ptr<SimpleVertexShader> vertexShader)
 	this->vertexShader = vertexShader;
 }
 
-void Material::SetColorTint(XMFLOAT4 colorTint)
+void Material::SetColorTint(XMFLOAT3 colorTint)
 {
 	this->colorTint = colorTint;
 }

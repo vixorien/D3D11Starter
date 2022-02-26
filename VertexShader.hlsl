@@ -1,7 +1,6 @@
 //describing layout of a chunk of memory
 cbuffer ExternalData : register(b0)
 {
-	float4 colorTint;
 	matrix worldMatrix;
 	matrix view;
 	matrix projection;
@@ -36,7 +35,8 @@ struct VertexToPixel
 	//  |    |                |
 	//  v    v                v
 	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
-	float4 color			: COLOR;        // RGBA color
+	float2 uv				: TEXCOORD;
+	float3 normal			: NORMAL;
 };
 
 // --------------------------------------------------------
@@ -63,10 +63,9 @@ VertexToPixel main(VertexShaderInput input)
 
 	output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
 
-	// Pass the color through 
-	// - The values will be interpolated per-pixel by the rasterizer
-	// - We don't need to alter it here, but we do need to send it to the pixel shader
-	output.color = colorTint;
+	// Pass other data through (for now)
+	output.uv = input.uv;
+	output.normal = input.normal; // This will need to be transformed for proper lighting
 
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)

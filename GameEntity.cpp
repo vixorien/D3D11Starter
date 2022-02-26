@@ -1,6 +1,7 @@
 #include "GameEntity.h"
 #include "BufferStructs.h"
-#include "Camera.h"
+#include "SimpleShader.h"
+#include "Camera.h" 
 #include "Material.h"
 #include <iostream>
 GameEntity::GameEntity(Mesh* mesh, std::shared_ptr<Material> mat)
@@ -22,12 +23,18 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::
     material->GetPixelShader()->SetShader();
 
     std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
-    vs->SetFloat4("colorTint", material->GetColorTint());    // Strings here MUST  
+    std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
+
     vs->SetMatrix4x4("worldMatrix", entitysTransform.BuildMatrix());   // match variable  
     vs->SetMatrix4x4("view", camera->GetViewMatrix());             // names in the  
     vs->SetMatrix4x4("projection", camera->GetProjectionMatrix()); // shader’s cbuffer!
+    vs->CopyAllBufferData();
 
-    vs->CopyAllBufferData(); // Adjust “vs” variable name if necessary 
+
+    // Send data to the pixel shader
+    ps->SetFloat3("colorTint", material->GetColorTint());
+    ps->CopyAllBufferData();
+
 	// Draw the object
 	entitysMesh->Draw();
 }

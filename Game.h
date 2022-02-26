@@ -37,6 +37,7 @@ private:
 	std::shared_ptr<Camera> camera;
 	//shaders
 	std::shared_ptr<SimplePixelShader> pixelShader;
+	std::shared_ptr<SimplePixelShader> pixelShader2;
 	std::shared_ptr<SimpleVertexShader> vertexShader;
 	//materials
 	std::shared_ptr<Material> mat1;

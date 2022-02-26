@@ -4,8 +4,10 @@
 
 
 using namespace DirectX;
+
 void Mesh::createBuffer(Vertex vertices[], int numOfVerts, unsigned int indices[], int numberOfIndices, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject)
 {
+	numOfIndices = numberOfIndices;
 	// Create the VERTEX BUFFER description -----------------------------------
 	// - The description is created on the stack because we only need
 	//    it to create the buffer.  The description is then useless.
@@ -16,10 +18,6 @@ void Mesh::createBuffer(Vertex vertices[], int numOfVerts, unsigned int indices[
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
 	vbd.StructureByteStride = 0;
-
-
-	// Create the proper struct to hold the initial vertex data
-	// - This is how we put the initial data into the buffer
 	D3D11_SUBRESOURCE_DATA initialVertexData = {};
 	initialVertexData.pSysMem = vertices;
 
@@ -40,9 +38,6 @@ void Mesh::createBuffer(Vertex vertices[], int numOfVerts, unsigned int indices[
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
 	ibd.StructureByteStride = 0;
-
-	// Create the proper struct to hold the initial index data
-	// - This is how we put the initial data into the buffer
 	D3D11_SUBRESOURCE_DATA initialIndexData = {};
 	initialIndexData.pSysMem = indices;
 
@@ -55,57 +50,11 @@ Mesh::Mesh(Vertex vertices[], int numberOfVerticesInArray, unsigned int indices[
 {
 	//setting our member variable to the correct object
 	context = contextObject;
-	numberOfIndices = numberOfIndicesInArray;
-	/*
-	// Create the VERTEX BUFFER description -----------------------------------
-	// - The description is created on the stack because we only need
-	//    it to create the buffer.  The description is then useless.
-	D3D11_BUFFER_DESC vbd = {};
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex) * numberOfVerticesInArray;       // 3 = number of vertices in the buffer
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER; // Tells DirectX this is a vertex buffer
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
-
-
-	// Create the proper struct to hold the initial vertex data
-	// - This is how we put the initial data into the buffer
-	D3D11_SUBRESOURCE_DATA initialVertexData = {};
-	initialVertexData.pSysMem = vertices;
-
-	// Actually create the buffer with the initial data
-	// - Once we do this, we'll NEVER CHANGE THE BUFFER AGAIN
-	deviceObject->CreateBuffer(&vbd, &initialVertexData, vertexBuffer.GetAddressOf());
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// Create the INDEX BUFFER description ------------------------------------
-	// - The description is created on the stack because we only need
-	//    it to create the buffer.  The description is then useless.
-	D3D11_BUFFER_DESC ibd = {};
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(unsigned int) * numberOfIndicesInArray;	// 3 = number of indices in the buffer
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;	// Tells DirectX this is an index buffer
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	ibd.StructureByteStride = 0;
-
-	// Create the proper struct to hold the initial index data
-	// - This is how we put the initial data into the buffer
-	D3D11_SUBRESOURCE_DATA initialIndexData = {};
-	initialIndexData.pSysMem = indices;
-
-	// Actually create the buffer with the initial data
-	// - Once we do this, we'll NEVER CHANGE THE BUFFER AGAIN
-	deviceObject->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
-	*/
 	createBuffer(vertices, numberOfVerticesInArray, indices, numberOfIndicesInArray, deviceObject);
 }
 
 //createBudder(&verts[0],vertCounter,&indices[0],vertCounter, device);
-Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, const char* filename)
+Mesh::Mesh(const char* filename,Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, Microsoft::WRL::ComPtr<ID3D11DeviceContext> contextObject)
 {
 	// Author: Chris Cascioli
 // Purpose: Basic .OBJ 3D model loading, supporting positions, uvs and normals
@@ -116,8 +65,9 @@ Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, const char* filena
 //
 // - NOTE: You'll need to #include <fstream>
 
-
-// File input object
+	//setting our member variable to the correct object
+	context = contextObject;
+	// File input object
 	std::ifstream obj(filename);
 
 	// Check for successful open
@@ -309,18 +259,8 @@ Mesh::Mesh(Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, const char* filena
 	// Close the file and create the actual buffers
 	obj.close();
 
-	// - At this point, "verts" is a vector of Vertex structs, and can be used
-	//    directly to create a vertex buffer:  &verts[0] is the address of the first vert
-	//
-	// - The vector "indices" is similar. It's a vector of unsigned ints and
-	//    can be used directly for the index buffer: &indices[0] is the address of the first int
-	//
-	// - "vertCounter" is the number of vertices
-	// - "indexCounter" is the number of indices
-	// - Yes, these are effectively the same since OBJs do not index entire vertices!  This means
-	//    an index buffer isn't doing much for us.  We could try to optimize the mesh ourselves
-	//    and detect duplicate vertices, but at that point it would be better to use a more
-	//    sophisticated model loading library like TinyOBJLoader or AssImp (yes, that's its name)
+	createBuffer(&verts[0], vertCounter, &indices[0], indexCounter, deviceObject);
+	
 }
 
 //because we are using smart pointers we do not need to clean out our memory
@@ -338,7 +278,7 @@ Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetIndexBuffer()
 }
 int Mesh::GetIndexCount() 
 {
-	return numberOfIndices;
+	return numOfIndices;
 }
 void Mesh::Draw() 
 {
