@@ -33,6 +33,8 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::
 
     // Send data to the pixel shader
     ps->SetFloat3("colorTint", material->GetColorTint());
+    ps->SetFloat("roughness", material->GetRoughness());
+    ps->SetFloat3("cameraPosition", camera->GetTransform()->GetPosition());
     ps->CopyAllBufferData();
 
 	// Draw the object

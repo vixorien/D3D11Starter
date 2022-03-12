@@ -92,4 +92,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ShaderIncludes.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>

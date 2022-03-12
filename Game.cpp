@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <iostream>
 #include "DXCore.h"
 #include "Vertex.h"
 #include "Input.h"
@@ -67,8 +68,8 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 
-	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(.5,.5,.5));
-	mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1,1,0));
+	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(1,1,1),.9f);
+	//mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1,1,0));
 
 	CreateBasicGeometry();
 
@@ -77,14 +78,10 @@ void Game::Init()
 	// Essentially: "What kind of shape should the GPU draw with our data?"
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	
-
-	
-
 	//create our camera
 	camera = std::make_shared<Camera>(0.0f, 0.0f, -5.0f, (float)width / height);
 
-
+	ambientColor = XMFLOAT3(0.1f, 0.1f, 0.25f);
 }
 
 // --------------------------------------------------------
@@ -112,15 +109,18 @@ void Game::CreateBasicGeometry()
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
 	shapeOne = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device,context);
+
+	//int me = shapeOne->GetIndexCount();
+	//std::cout << me;
 	shapeTwo = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/torus.obj").c_str(), device,context);
 	shapeThree = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device,context);
 	
 	//creating our 5 entitys
 	GameEntity* entityOne = new GameEntity(shapeOne.get(),mat1);
 	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat1);
-	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat2);
-	GameEntity* entityFour = new GameEntity(shapeThree.get(),mat2);
-	GameEntity* entityFive = new GameEntity(shapeThree.get(),mat2);
+	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat1);
+	GameEntity* entityFour = new GameEntity(shapeThree.get(),mat1);
+	GameEntity* entityFive = new GameEntity(shapeThree.get(),mat1);
 	
 	//pushing entitys to list
 	listOfEntitys.push_back(entityOne);
@@ -183,6 +183,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	
 	//loop through and draw our entitys
 	for (int i = 0; i < listOfEntitys.size(); i++) {
+		//going to pass this jawn over to our shader here because for some reason this doesnt belong in entity class but wouldnt it make more sense to pass the ambient color into the entity instead of creating a seperation of tasks that just doesnt make a whole lot of sense, Yeah i get it, this is probably a little less cpu power but im not sure if its worth the loss in coesive code
+		listOfEntitys[i]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
 		listOfEntitys[i]->Draw(context, camera);
 	}
 	
