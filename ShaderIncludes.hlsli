@@ -33,6 +33,7 @@ struct VertexToPixel
 	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
 	float2 uv				: TEXCOORD;
 	float3 normal			: NORMAL;
+	float3 worldPosition	: POSITION;	
 };
 
 #endif

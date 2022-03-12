@@ -28,7 +28,7 @@ DirectX::XMFLOAT4X4 Transform::BuildMatrix()
 		XMMATRIX worldMat = scaleMat * rotMat * transMat;
 		//set our worldmatrix
 		XMStoreFloat4x4(&worldMatrix, worldMat);
-
+		XMStoreFloat4x4(&worldInverseTransposeMatrix, XMMatrixInverse(0, XMMatrixTranspose(worldMat)));
 		//remember to clean matrix
 		matrixDirty = false;
 	}
@@ -161,6 +161,12 @@ DirectX::XMFLOAT3 Transform::GetUp()
 	XMStoreFloat3(&up, upMath);
 	//return it
 	return up;
+}
+
+DirectX::XMFLOAT4X4 Transform::GetWorldInverseTranspose()
+{
+	BuildMatrix();
+	return worldInverseTransposeMatrix;
 }
 
 DirectX::XMFLOAT3 Transform::GetPosition()

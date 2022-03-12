@@ -28,6 +28,7 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::
     vs->SetMatrix4x4("worldMatrix", entitysTransform.BuildMatrix());   // match variable  
     vs->SetMatrix4x4("view", camera->GetViewMatrix());             // names in the  
     vs->SetMatrix4x4("projection", camera->GetProjectionMatrix()); // shader’s cbuffer!
+    vs->SetMatrix4x4("invTransposeWorldMatrix", entitysTransform.GetWorldInverseTranspose()); // shader’s cbuffer!
     vs->CopyAllBufferData();
 
 

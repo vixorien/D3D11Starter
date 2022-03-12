@@ -26,6 +26,8 @@ public:
 	DirectX::XMFLOAT3 GetForward();
 	DirectX::XMFLOAT3 GetUp();
 
+	DirectX::XMFLOAT4X4 GetWorldInverseTranspose();
+
 private:
 	//raw transformation data
 	//3 movements rotate scale pos
@@ -35,7 +37,7 @@ private:
 
 	//finalized array
 	DirectX::XMFLOAT4X4 worldMatrix;
-
+	DirectX::XMFLOAT4X4 worldInverseTransposeMatrix;
 	//does our matrix need a new update
 	bool matrixDirty;
 };
