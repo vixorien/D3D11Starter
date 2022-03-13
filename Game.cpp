@@ -81,7 +81,17 @@ void Game::Init()
 	//create our camera
 	camera = std::make_shared<Camera>(0.0f, 0.0f, -5.0f, (float)width / height);
 
-	ambientColor = XMFLOAT3(0.1f, 0.1f, 0.25f);
+	//create our ambient color taht will be sent to  pixel shader
+	ambientColor = XMFLOAT3(0.1, 0.1, 0.25);
+
+	//create our first light, it is going to be a directional light
+	myDirectionLight = {};
+	//setting only the values we need to set for a directional light
+	myDirectionLight.Type = 0;
+	//pointing right
+	myDirectionLight.Direction = XMFLOAT3(1, 0, 0);
+	myDirectionLight.Color = XMFLOAT3(1, 0, 0);
+	myDirectionLight.Intensity = 0.5;
 }
 
 // --------------------------------------------------------
@@ -168,6 +178,12 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
+	//make sure this is making its way to the shader 
+	pixelShader->SetData(
+		"myDirectionLight",   // The name of the (eventual) variable in the shader 
+		&myDirectionLight,   // The address of the data to set 
+		sizeof(Light));  // The size of the data (the whole struct!) to set
+
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
 

@@ -7,6 +7,7 @@
 #include <vector>
 #include "SimpleShader.h"
 #include "Material.h"
+#include "Lights.h"
 class Game 
 	: public DXCore
 {
@@ -45,6 +46,7 @@ private:
 	std::shared_ptr<Material> mat3;
 	//lights and light data
 	XMFLOAT3 ambientColor;
+	Light myDirectionLight;
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
 

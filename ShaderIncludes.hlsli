@@ -1,5 +1,15 @@
+
+
 #ifndef __GGP_SHADER_INCLUDES__ // Each .hlsli file needs a unique identifier! 
 #define __GGP_SHADER_INCLUDES__ 
+
+//make sure we define our different light types
+#define LIGHT_TYPE_DIRECTIONAL 0 
+#define LIGHT_TYPE_POINT  1 
+#define LIGHT_TYPE_SPOT  2
+#define MAX_SPECULAR_EXPONENT 256.0f 
+
+
 
 // Struct representing a single vertex worth of data
 // - This should match the vertex definition in our C++ code
@@ -36,4 +46,16 @@ struct VertexToPixel
 	float3 worldPosition	: POSITION;	
 };
 
+struct Light
+{
+	int Type;    // Which kind of light?  0, 1 or 2 (see above) 
+	float3 Direction; // Directional and Spot lights need a direction 
+	float Range;  // Point and Spot lights have a max range for attenuation 
+	float3 Position; // Point and Spot lights have a position in space 
+	float Intensity;  // All lights need an intensity 
+	float3 Color;   // All lights need a color 
+	float SpotFalloff;  // Spot lights need a value to define their “cone” size 
+	float3 Padding;
+
+};
 #endif
