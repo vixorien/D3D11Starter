@@ -47,6 +47,8 @@ private:
 	//lights and light data
 	XMFLOAT3 ambientColor;
 	Light myDirectionLight;
+	Light myDirectionLight2;
+	Light myDirectionLight3;
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
 

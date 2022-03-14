@@ -68,7 +68,7 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 
-	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(1,1,1),.9f);
+	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(1,1,1),.8f);
 	//mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1,1,0));
 
 	CreateBasicGeometry();
@@ -86,12 +86,24 @@ void Game::Init()
 
 	//create our first light, it is going to be a directional light
 	myDirectionLight = {};
+	myDirectionLight2 = {};
+	myDirectionLight3 = {};
 	//setting only the values we need to set for a directional light
 	myDirectionLight.Type = 0;
+	myDirectionLight2.Type = 0;
+	myDirectionLight3.Type = 0;
 	//pointing right
 	myDirectionLight.Direction = XMFLOAT3(1, 0, 0);
+	myDirectionLight2.Direction = XMFLOAT3(-1, 0, 0);
+	myDirectionLight3.Direction = XMFLOAT3(0, -1, 0);
+	/// /////color////////////////
 	myDirectionLight.Color = XMFLOAT3(1, 0, 0);
+	myDirectionLight2.Color = XMFLOAT3(0, 1, 0);
+	myDirectionLight3.Color = XMFLOAT3(0, 0, 1);
+	/// //////intensity/////////////
 	myDirectionLight.Intensity = 0.5;
+	myDirectionLight2.Intensity = 0.5;
+	myDirectionLight3.Intensity = 0.5;
 }
 
 // --------------------------------------------------------
@@ -183,6 +195,14 @@ void Game::Draw(float deltaTime, float totalTime)
 		"myDirectionLight",   // The name of the (eventual) variable in the shader 
 		&myDirectionLight,   // The address of the data to set 
 		sizeof(Light));  // The size of the data (the whole struct!) to set
+	pixelShader->SetData(
+		"myDirectionLight2",   
+		&myDirectionLight2,   
+		sizeof(Light));  
+	pixelShader->SetData(
+		"myDirectionLight3",
+		&myDirectionLight3,
+		sizeof(Light));
 
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
