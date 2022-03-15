@@ -84,26 +84,29 @@ void Game::Init()
 	//create our ambient color taht will be sent to  pixel shader
 	ambientColor = XMFLOAT3(0.1, 0.1, 0.25);
 
-	//create our first light, it is going to be a directional light
-	myDirectionLight = {};
-	myDirectionLight2 = {};
-	myDirectionLight3 = {};
+	Light dirLight1 = {};
+	Light dirLight2 = {};
+	Light dirLight3 = {};
 	//setting only the values we need to set for a directional light
-	myDirectionLight.Type = 0;
-	myDirectionLight2.Type = 0;
-	myDirectionLight3.Type = 0;
+	dirLight1.Type = 0;
+	dirLight2.Type = 0;
+	dirLight3.Type = 0;
 	//pointing right
-	myDirectionLight.Direction = XMFLOAT3(1, 0, 0);
-	myDirectionLight2.Direction = XMFLOAT3(-1, 0, 0);
-	myDirectionLight3.Direction = XMFLOAT3(0, -1, 0);
+	dirLight1.Direction = XMFLOAT3(1, 0, 0);
+	dirLight2.Direction = XMFLOAT3(-1, 0, 0);
+	dirLight3.Direction = XMFLOAT3(0, -1, 0);
 	/// /////color////////////////
-	myDirectionLight.Color = XMFLOAT3(1, 0, 0);
-	myDirectionLight2.Color = XMFLOAT3(0, 1, 0);
-	myDirectionLight3.Color = XMFLOAT3(0, 0, 1);
+	dirLight1.Color = XMFLOAT3(1, 0, 0);
+	dirLight2.Color = XMFLOAT3(0, 1, 0);
+	dirLight3.Color = XMFLOAT3(0, 0, 1);
 	/// //////intensity/////////////
-	myDirectionLight.Intensity = 0.5;
-	myDirectionLight2.Intensity = 0.5;
-	myDirectionLight3.Intensity = 0.5;
+	dirLight1.Intensity = 1;
+	dirLight2.Intensity = 1;
+	dirLight3.Intensity =1;
+
+	lights.push_back(dirLight1);
+	lights.push_back(dirLight2);
+	lights.push_back(dirLight3);
 }
 
 // --------------------------------------------------------
@@ -190,19 +193,8 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-	//make sure this is making its way to the shader 
-	pixelShader->SetData(
-		"myDirectionLight",   // The name of the (eventual) variable in the shader 
-		&myDirectionLight,   // The address of the data to set 
-		sizeof(Light));  // The size of the data (the whole struct!) to set
-	pixelShader->SetData(
-		"myDirectionLight2",   
-		&myDirectionLight2,   
-		sizeof(Light));  
-	pixelShader->SetData(
-		"myDirectionLight3",
-		&myDirectionLight3,
-		sizeof(Light));
+
+	pixelShader->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };

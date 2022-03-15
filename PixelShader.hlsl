@@ -1,14 +1,13 @@
 #include "ShaderIncludes.hlsli" 
-
+#define NUM_LIGHTS 3
 cbuffer ExternalData : register(b0)
 {
-	float3 colorTint;
 	float roughness;
+	float3 colorTint;
 	float3 cameraPosition;
 	float3 ambient;
-	Light myDirectionLight;
-	Light myDirectionLight2;
-	Light myDirectionLight3;
+	Light lights[NUM_LIGHTS];
+
 }
 //calculate the diffuse lighting with the normalized dir to light , and normals
 float3 Diffuse(float3 normal, float3 dirToLight)
@@ -46,7 +45,6 @@ float3 CreateDirectionalLight(Light light,float3 normalizedNormals, float3 viewV
 	if (specExponent > .05) 
 	{
 		//calculate incoming light direction
-
 		specularPhongLight = (SpecularPhong(normalizedNormals, -dirToLight, viewVector, specExponent));
 	}
 	//if not
@@ -78,15 +76,28 @@ float4 main(VertexToPixel input) : SV_TARGET
 	///////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////Ambient////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
-	float3 ambientLight = (ambient * colorTint);
+	float3 lightTotal = (ambient * colorTint);
+	//float3 lightTotal = (0,0,0);
 	////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
-	float3 dirLight1 = CreateDirectionalLight(myDirectionLight, input.normal, viewVector);
-	float3 dirLight2 = CreateDirectionalLight(myDirectionLight2, input.normal, viewVector);
-	float3 dirLight3 = CreateDirectionalLight(myDirectionLight3, input.normal, viewVector);
-	//////
-	float3 finalPixelColor = dirLight1 + dirLight2 + dirLight3 + ambientLight;
-	return float4(finalPixelColor, .5);
+	// Loop and handle all lights
+	for (int i = 0; i < NUM_LIGHTS; i++)
+	{
+
+		//run the right method for the right light
+		switch (lights[i].Type)
+		{		
+			case LIGHT_TYPE_DIRECTIONAL:
+				lightTotal += CreateDirectionalLight(lights[i], input.normal, viewVector);
+				break;
+
+			case LIGHT_TYPE_POINT:
+				break;
+		}
+	}
+	///////////////////////////////////////////////////////////
+	float3 finalPixelColor = lightTotal;
+	return float4(finalPixelColor, 1);
 
 
 }

@@ -46,9 +46,7 @@ private:
 	std::shared_ptr<Material> mat3;
 	//lights and light data
 	XMFLOAT3 ambientColor;
-	Light myDirectionLight;
-	Light myDirectionLight2;
-	Light myDirectionLight3;
+	std::vector<Light> lights;
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
 
