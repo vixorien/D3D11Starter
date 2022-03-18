@@ -1,4 +1,5 @@
 #include "ShaderIncludes.hlsli" 
+#include "Lighting.hlsli" 
 #define NUM_LIGHTS 3
 cbuffer ExternalData : register(b0)
 {
@@ -9,54 +10,7 @@ cbuffer ExternalData : register(b0)
 	Light lights[NUM_LIGHTS];
 
 }
-//calculate the diffuse lighting with the normalized dir to light , and normals
-float3 Diffuse(float3 normal, float3 dirToLight)
-{
-	return saturate(dot(normal, dirToLight));
-}
-float SpecularPhong(float3 normal, float3 incomingLightDir,float viewVector,float specExponent) {
-	//calculate the perfect reflection of the incoming light
-	float3 reflection = reflect(incomingLightDir, normal);
 
-	//determine how close it is to out view vector 
-	float spec = saturate(dot(reflection, viewVector));
-
-	//raise to a power for quick fall off
-	return pow(spec, specExponent);
-}
-float3 CreateDirectionalLight(Light light,float3 normalizedNormals, float3 viewVector)
-{
-
-	///////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////direction/////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////////
-	//make sure we negate the lights direction and normalize it for the diffuse function
-	float3 dirToLight = normalize(-light.Direction);
-	float3 diffuse = Diffuse(normalizedNormals, dirToLight);
-	float3 diffuseLight = (diffuse * light.Color * colorTint);
-	/////////////////////////////////////////////////////////////
-	/////////////////////////specular phong///////////////////////////////////////////////////
-	// 	   /////////////////////////////////////////////////////////////////////////////////////// 
-	//declare lighttyper
-	float specularPhongLight=0;
-	//first lets get our specular component so we can craft our conditionals
-	float specExponent = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
-	//if shiny	
-	if (specExponent > .05) 
-	{
-		//calculate incoming light direction
-		specularPhongLight = (SpecularPhong(normalizedNormals, -dirToLight, viewVector, specExponent));
-	}
-	//if not
-	else 
-	{
-		specularPhongLight = 0;
-	}
-
-	//return the final light
-	float3 finalLight = diffuseLight + specularPhongLight;
-	return finalLight;
-}
 
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
@@ -72,23 +26,24 @@ float4 main(VertexToPixel input) : SV_TARGET
 	//these do not change
 	//make sure we normalize our normals coming from our vertex shader
 	input.normal = normalize(input.normal);
-	float viewVector = normalize(cameraPosition - input.worldPosition);
 	///////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////Ambient////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
-	float3 lightTotal = (ambient * colorTint);
-	//float3 lightTotal = (0,0,0);
+	//float3 lightTotal = (ambient * colorTint);
+	float3 lightTotal = (0,0,0);
 	////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Loop and handle all lights
 	for (int i = 0; i < NUM_LIGHTS; i++)
 	{
+		Light light = lights[i];
+		light.Direction = normalize(light.Direction);
 
 		//run the right method for the right light
 		switch (lights[i].Type)
 		{		
 			case LIGHT_TYPE_DIRECTIONAL:
-				lightTotal += CreateDirectionalLight(lights[i], input.normal, viewVector);
+				lightTotal += CreateDirectionalLight(lights[i], input.normal,roughness,colorTint,cameraPosition,input.worldPosition);
 				break;
 
 			case LIGHT_TYPE_POINT:

@@ -68,7 +68,7 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 
-	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(1,1,1),.8f);
+	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(1,1,1),.5f);
 	//mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1,1,0));
 
 	CreateBasicGeometry();
