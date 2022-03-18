@@ -3,11 +3,7 @@
 #ifndef __GGP_SHADER_INCLUDES__ // Each .hlsli file needs a unique identifier! 
 #define __GGP_SHADER_INCLUDES__ 
 
-//make sure we define our different light types
-#define LIGHT_TYPE_DIRECTIONAL 0 
-#define LIGHT_TYPE_POINT  1 
-#define LIGHT_TYPE_SPOT  2
-#define MAX_SPECULAR_EXPONENT 512.0f 
+
 
 
 

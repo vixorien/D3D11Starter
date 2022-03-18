@@ -1,6 +1,7 @@
 #include "ShaderIncludes.hlsli" 
 #include "Lighting.hlsli" 
-#define NUM_LIGHTS 3
+#define NUM_LIGHTS 5
+
 cbuffer ExternalData : register(b0)
 {
 	float roughness;
@@ -10,8 +11,6 @@ cbuffer ExternalData : register(b0)
 	Light lights[NUM_LIGHTS];
 
 }
-
-
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
 // 
@@ -29,8 +28,8 @@ float4 main(VertexToPixel input) : SV_TARGET
 	///////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////Ambient////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
-	//float3 lightTotal = (ambient * colorTint);
-	float3 lightTotal = (0,0,0);
+	float3 lightTotal = (ambient * colorTint);
+	//float3 lightTotal = (0,0,0);
 	////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Loop and handle all lights
@@ -47,6 +46,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 				break;
 
 			case LIGHT_TYPE_POINT:
+				lightTotal += CreatePointLight(lights[i], input.normal, roughness, colorTint, cameraPosition, input.worldPosition);
 				break;
 		}
 	}

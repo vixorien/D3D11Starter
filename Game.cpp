@@ -87,10 +87,14 @@ void Game::Init()
 	Light dirLight1 = {};
 	Light dirLight2 = {};
 	Light dirLight3 = {};
+	Light pointLight1 = {};
+	Light pointLight2 = {};
 	//setting only the values we need to set for a directional light
 	dirLight1.Type = 0;
 	dirLight2.Type = 0;
 	dirLight3.Type = 0;
+	pointLight1.Type = 1;
+	pointLight2.Type = 1;
 	//pointing right
 	dirLight1.Direction = XMFLOAT3(1, 0, 0);
 	dirLight2.Direction = XMFLOAT3(-1, 0, 0);
@@ -99,14 +103,25 @@ void Game::Init()
 	dirLight1.Color = XMFLOAT3(1, 0, 0);
 	dirLight2.Color = XMFLOAT3(0, 1, 0);
 	dirLight3.Color = XMFLOAT3(0, 0, 1);
+	pointLight1.Color = XMFLOAT3(.25, 1, .3);
+	pointLight2.Color = XMFLOAT3(.44, .44, 1);
 	/// //////intensity/////////////
 	dirLight1.Intensity = 1;
 	dirLight2.Intensity = 1;
 	dirLight3.Intensity =1;
-
+	pointLight1.Intensity = 1;
+	pointLight2.Intensity = 1;
+	/// //////Position(not for directionals)/////////////
+	pointLight1.Position = XMFLOAT3(-7, 0, 0);
+	pointLight2.Position = XMFLOAT3(0, -1, 0);
+	/// //////Range(not for directionals)/////////////
+	pointLight1.Range = 10.0f;
+	pointLight2.Range = 5.0f;
 	lights.push_back(dirLight1);
 	lights.push_back(dirLight2);
 	lights.push_back(dirLight3);
+	lights.push_back(pointLight1);
+	lights.push_back(pointLight2);
 }
 
 // --------------------------------------------------------
