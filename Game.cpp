@@ -7,6 +7,7 @@
 #include "BufferStructs.h"
 #include "GameEntity.h"
 #include "Material.h"
+#include "WICTextureLoader.h"
 
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
@@ -63,13 +64,38 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
-	// Helper methods for loading shaders, creating some basic
-	// geometry to draw and some simple camera matrices.
-	//  - You'll be expanding and/or replacing these later
+	// Create a sampler state for texture sampling options
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+	D3D11_SAMPLER_DESC sampDesc = {};
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; // What happens outside the 0-1 uv range?
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;		// How do we handle sampling "between" pixels?
+	sampDesc.MaxAnisotropy = 16;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
+	// Create a sampler state for texture sampling options
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler2;
+	device->CreateSamplerState(&sampDesc, sampler2.GetAddressOf());
+	//now that we have sampler state  load our textures
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rock;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brick;
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/brick.jpg").c_str(), 0, rock.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/rock.jpg").c_str(), 0, brick.GetAddressOf());
+
+
 	LoadShaders();
 
-	mat1 = std::make_shared<Material>(vertexShader, pixelShader,XMFLOAT3(1,1,1),.5f);
-	//mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1,1,0));
+
+	mat1 = std::make_shared<Material>(vertexShader, pixelShader, XMFLOAT3(1, 1, 1), .9f);
+	mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
+	//set the resources for this material
+	mat1->AddTextureSRV("SurfaceTexture", rock);
+	mat1->AddSampler("BasicSampler", sampler);
+	//set the resources for this material
+	mat2->AddTextureSRV("SurfaceTexture", brick);
+	mat2->AddSampler("BasicSampler", sampler2);
+
 
 	CreateBasicGeometry();
 
@@ -81,47 +107,7 @@ void Game::Init()
 	//create our camera
 	camera = std::make_shared<Camera>(0.0f, 0.0f, -5.0f, (float)width / height);
 
-	//create our ambient color taht will be sent to  pixel shader
-	ambientColor = XMFLOAT3(0.1, 0.1, 0.25);
-
-	Light dirLight1 = {};
-	Light dirLight2 = {};
-	Light dirLight3 = {};
-	Light pointLight1 = {};
-	Light pointLight2 = {};
-	//setting only the values we need to set for a directional light
-	dirLight1.Type = 0;
-	dirLight2.Type = 0;
-	dirLight3.Type = 0;
-	pointLight1.Type = 1;
-	pointLight2.Type = 1;
-	//pointing right
-	dirLight1.Direction = XMFLOAT3(1, 0, 0);
-	dirLight2.Direction = XMFLOAT3(-1, 0, 0);
-	dirLight3.Direction = XMFLOAT3(0, -1, 0);
-	/// /////color////////////////
-	dirLight1.Color = XMFLOAT3(1, 0, 0);
-	dirLight2.Color = XMFLOAT3(0, 1, 0);
-	dirLight3.Color = XMFLOAT3(0, 0, 1);
-	pointLight1.Color = XMFLOAT3(.25, 1, .3);
-	pointLight2.Color = XMFLOAT3(.44, .44, 1);
-	/// //////intensity/////////////
-	dirLight1.Intensity = 1;
-	dirLight2.Intensity = 1;
-	dirLight3.Intensity =1;
-	pointLight1.Intensity = 1;
-	pointLight2.Intensity = 1;
-	/// //////Position(not for directionals)/////////////
-	pointLight1.Position = XMFLOAT3(-7, 0, 0);
-	pointLight2.Position = XMFLOAT3(0, -1, 0);
-	/// //////Range(not for directionals)/////////////
-	pointLight1.Range = 10.0f;
-	pointLight2.Range = 5.0f;
-	lights.push_back(dirLight1);
-	lights.push_back(dirLight2);
-	lights.push_back(dirLight3);
-	lights.push_back(pointLight1);
-	lights.push_back(pointLight2);
+	LoadLights();
 }
 
 // --------------------------------------------------------
@@ -149,18 +135,18 @@ void Game::CreateBasicGeometry()
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
 	shapeOne = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device,context);
-
-	//int me = shapeOne->GetIndexCount();
-	//std::cout << me;
 	shapeTwo = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/torus.obj").c_str(), device,context);
 	shapeThree = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device,context);
-	
+	shapeFour = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cylinder.obj").c_str(), device, context);
+	shapeFive = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device, context);
+	shapeSix = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/quad.obj").c_str(), device, context);
+
 	//creating our 5 entitys
 	GameEntity* entityOne = new GameEntity(shapeOne.get(),mat1);
 	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat1);
-	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat1);
-	GameEntity* entityFour = new GameEntity(shapeThree.get(),mat1);
-	GameEntity* entityFive = new GameEntity(shapeThree.get(),mat1);
+	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat2);
+	GameEntity* entityFour = new GameEntity(shapeFour.get(),mat2);
+	GameEntity* entityFive = new GameEntity(shapeFive.get(),mat2);
 	
 	//pushing entitys to list
 	listOfEntitys.push_back(entityOne);
@@ -175,6 +161,58 @@ void Game::CreateBasicGeometry()
 	listOfEntitys[2]->getTransform()->SetPosition(2.5, 0, 0);
 	listOfEntitys[3]->getTransform()->SetPosition(-5.5, 0, 0);
 	listOfEntitys[4]->getTransform()->SetPosition(5.5, 0, 0);
+}
+
+void Game::LoadLights()
+{
+	//create our ambient color taht will be sent to  pixel shader
+	ambientColor = XMFLOAT3(0.1, 0.1, 0.25);
+
+	Light dirLight1 = {};
+	Light dirLight2 = {};
+	Light dirLight3 = {};
+	Light pointLight1 = {};
+	Light pointLight2 = {};
+	//setting only the values we need to set for a directional light
+	dirLight1.Type = 0;
+	dirLight2.Type = 0;
+	dirLight3.Type = 0;
+	pointLight1.Type = 1;
+	pointLight2.Type = 1;
+	//pointing right
+	dirLight1.Direction = XMFLOAT3(1, 0, 0);
+	dirLight2.Direction = XMFLOAT3(-1, 0, 0);
+	dirLight3.Direction = XMFLOAT3(0, -1, 0);
+	/// /////color////////////////
+	dirLight1.Color = XMFLOAT3(.5, .5, .5);
+	dirLight2.Color = XMFLOAT3(.5, .5, .5);
+	dirLight3.Color = XMFLOAT3(.5, .5, .5);
+	pointLight1.Color = XMFLOAT3(.5, .5, .5);
+	pointLight2.Color = XMFLOAT3(1, 1, 1);
+	/// //////intensity/////////////
+	dirLight1.Intensity = .71;
+	dirLight2.Intensity = .51;
+	dirLight3.Intensity = .41;
+	pointLight1.Intensity = .1;
+	pointLight2.Intensity = .90;
+	/// //////Position(not for directionals)/////////////
+	pointLight1.Position = XMFLOAT3(-7, 3, 0);
+	pointLight2.Position = XMFLOAT3(0, -1, 0);
+	/// //////Range(not for directionals)/////////////
+	pointLight1.Range = 10.0f;
+	pointLight2.Range = 5.0f;
+	lights.push_back(dirLight1);
+	lights.push_back(dirLight2);
+	lights.push_back(dirLight3);
+	lights.push_back(pointLight1);
+	lights.push_back(pointLight2);
+}
+
+void Game::LoadTexturesSRVsAndSampler()
+{
+	
+
+	
 }
 
 
@@ -208,8 +246,13 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
+	offset += .00001f;
 
 	pixelShader->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+	pixelShader2->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+
+	//pass in the UV offset
+	pixelShader->SetFloat("scale", offset);
 
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
@@ -228,6 +271,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	for (int i = 0; i < listOfEntitys.size(); i++) {
 		//going to pass this jawn over to our shader here because for some reason this doesnt belong in entity class but wouldnt it make more sense to pass the ambient color into the entity instead of creating a seperation of tasks that just doesnt make a whole lot of sense, Yeah i get it, this is probably a little less cpu power but im not sure if its worth the loss in coesive code
 		listOfEntitys[i]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
+		listOfEntitys[i]->GetMaterial()->BindTexturesAndSamplers();
+
 		listOfEntitys[i]->Draw(context, camera);
 	}
 	

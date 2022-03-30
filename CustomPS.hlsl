@@ -1,36 +1,63 @@
+#include "ShaderIncludes.hlsli" 
+#include "Lighting.hlsli" 
+#define NUM_LIGHTS 5
+
 cbuffer ExternalData : register(b0)
 {
+	float roughness;
 	float3 colorTint;
-}
-// Struct representing the data we expect to receive from earlier pipeline stages
-// - Should match the output of our corresponding vertex shader
-// - The name of the struct itself is unimportant
-// - The variable names don't have to match other shaders (just the semantics)
-// - Each variable must have a semantic, which defines its usage
-struct VertexToPixel
-{
-	// Data type
-	//  |
-	//  |   Name          Semantic
-	//  |    |                |
-	//  v    v                v
-	float4 screenPosition	: SV_POSITION;
-	float2 uv				: TEXCOORD;
-	float3 normal			: NORMAL;
-};
+	float3 cameraPosition;
+	float3 ambient;
+	Light lights[NUM_LIGHTS];
 
-// --------------------------------------------------------
-// The entry point (main method) for our pixel shader
-// 
-// - Input is the data coming down the pipeline (defined by the struct)
-// - Output is a single color (float4)
-// - Has a special semantic (SV_TARGET), which means 
-//    "put the output of this into the current render target"
-// - Named "main" because that's the default the shader compiler looks for
-// --------------------------------------------------------
+}
+Texture2D SurfaceTexture : register(t0); // "t" registers for textures
+SamplerState BasicSampler : register(s0); // "s" registers for samplers
+
+
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	//return float4(input.uv, 0, 1);
-	//return float4(colorTint, 1);
-	return tan(float4(input.uv.x/input.normal.x, input.uv.y / input.normal.y, input.screenPosition.x, 1)); // Returns purple (or another color of your choice)
+	//make sure we normalize our normals coming from our vertex shader
+	input.normal = normalize(input.normal);
+
+
+
+//get our surfaceColor(texture)
+float3 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv/8).rgb;
+float3 surfaceColor2 = SurfaceTexture.Sample(BasicSampler, input.uv).rgb;
+
+surfaceColor *= surfaceColor2;
+//multiply our surface color by our colorTint
+surfaceColor *= colorTint;
+
+///////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////Ambient////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+float3 lightTotal = (ambient * surfaceColor);
+//float3 lightTotal = (0,0,0);
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+// Loop and handle all lights
+for (int i = 0; i < NUM_LIGHTS; i++)
+{
+	Light light = lights[i];
+	light.Direction = normalize(light.Direction);
+
+	//run the right method for the right light
+	switch (lights[i].Type)
+	{
+		case LIGHT_TYPE_DIRECTIONAL:
+			lightTotal += CreateDirectionalLight(lights[i], input.normal,roughness,colorTint,cameraPosition,input.worldPosition);
+			break;
+
+		case LIGHT_TYPE_POINT:
+			lightTotal += CreatePointLight(lights[i], input.normal, roughness, colorTint, cameraPosition, input.worldPosition);
+			break;
+	}
+}
+///////////////////////////////////////////////////////////
+float3 finalPixelColor = lightTotal;
+return float4(finalPixelColor, 1);
+
+
 }

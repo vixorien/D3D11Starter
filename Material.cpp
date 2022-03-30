@@ -52,3 +52,21 @@ void Material::SetRoughness(float roughnessParam)
 {
 	this->roughness = roughnessParam;
 }
+
+void Material::AddTextureSRV(std::string textureSRVName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SRV)
+{
+	//insert the key value pairs into out T UO Map
+	textureSRVs.insert({ textureSRVName,SRV});
+}
+
+void Material::AddSampler(std::string samplerName, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
+{
+	samplers.insert({ samplerName,sampler});
+}
+
+void Material::BindTexturesAndSamplers()
+{
+	//t.first is the name, t.second is the value(the actual object)
+	for (auto& t : textureSRVs) { pixelShader->SetShaderResourceView(t.first.c_str(), t.second); }
+	for (auto& s : samplers) { pixelShader->SetSamplerState(s.first.c_str(), s.second); }
+}

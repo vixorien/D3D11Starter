@@ -8,27 +8,31 @@ cbuffer ExternalData : register(b0)
 	float3 colorTint;
 	float3 cameraPosition;
 	float3 ambient;
+	float scale;
 	Light lights[NUM_LIGHTS];
 
 }
-// --------------------------------------------------------
-// The entry point (main method) for our pixel shader
-// 
-// - Input is the data coming down the pipeline (defined by the struct)
-// - Output is a single color (float4)
-// - Has a special semantic (SV_TARGET), which means 
-//    "put the output of this into the current render target"
-// - Named "main" because that's the default the shader compiler looks for
-// --------------------------------------------------------
+Texture2D SurfaceTexture : register(t0); // "t" registers for textures
+SamplerState BasicSampler : register(s0); // "s" registers for samplers
+
+
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	//these do not change
 	//make sure we normalize our normals coming from our vertex shader
 	input.normal = normalize(input.normal);
+
+	input.uv += scale;
+
+
+	//get our surfaceColor(texture)
+	float3 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv*2).rgb;
+	//multiply our surface color by our colorTint
+	surfaceColor *= colorTint;
+
 	///////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////Ambient////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
-	float3 lightTotal = (ambient * colorTint);
+	float3 lightTotal = (ambient * surfaceColor);
 	//float3 lightTotal = (0,0,0);
 	////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////

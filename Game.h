@@ -32,6 +32,9 @@ private:
 	std::shared_ptr<Mesh> shapeOne;
 	std::shared_ptr<Mesh> shapeTwo;
 	std::shared_ptr<Mesh> shapeThree;
+	std::shared_ptr<Mesh> shapeFour;
+	std::shared_ptr<Mesh> shapeFive;
+	std::shared_ptr<Mesh> shapeSix;
 	//transform
 	Transform transform;
 	//camera
@@ -50,9 +53,12 @@ private:
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
 
+	float offset;
 	// Initialization helper methods - feel free to customize, combine, etc.
 	void LoadShaders(); 
 	void CreateBasicGeometry();
+	void LoadLights();
+	void LoadTexturesSRVsAndSampler();
 
 	
 
