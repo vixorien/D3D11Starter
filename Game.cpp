@@ -64,8 +64,7 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
-	// Create a sampler state for texture sampling options
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+
 	D3D11_SAMPLER_DESC sampDesc = {};
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; // What happens outside the 0-1 uv range?
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -73,29 +72,59 @@ void Game::Init()
 	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;		// How do we handle sampling "between" pixels?
 	sampDesc.MaxAnisotropy = 16;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
+
 	// Create a sampler state for texture sampling options
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+	device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
+	//
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler2;
 	device->CreateSamplerState(&sampDesc, sampler2.GetAddressOf());
+	//
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler3;
+	device->CreateSamplerState(&sampDesc, sampler3.GetAddressOf());
+	//
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler4;
+	device->CreateSamplerState(&sampDesc, sampler4.GetAddressOf());
+
 	//now that we have sampler state  load our textures
+	//hold out textures 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rock;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockNormals;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brick;
-	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/brick.jpg").c_str(), 0, rock.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/rock.jpg").c_str(), 0, brick.GetAddressOf());
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brickNormals;
+
+	//set them
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/rock.png").c_str(), 0, rock.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/rock_normals.png").c_str(), 0, rockNormals.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cobblestone.png").c_str(), 0, brick.GetAddressOf());
 
 
 	LoadShaders();
 
 
 	mat1 = std::make_shared<Material>(vertexShader, pixelShader, XMFLOAT3(1, 1, 1), .9f);
+	/*
 	mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
+	*/
+	mat2 = std::make_shared<Material>(vertexShaderNM, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
+	mat3 = std::make_shared<Material>(vertexShaderNM, pixelShaderNM, XMFLOAT3(1, 1, 1), 1.0f);
 	//set the resources for this material
 	mat1->AddTextureSRV("SurfaceTexture", rock);
 	mat1->AddSampler("BasicSampler", sampler);
 	//set the resources for this material
+	/*
 	mat2->AddTextureSRV("SurfaceTexture", brick);
 	mat2->AddSampler("BasicSampler", sampler2);
-
+	//set resources for material
+	mat3->AddTextureSRV("SurfaceTexture", rock);
+	mat3->AddSampler("BasicSampler", sampler3);
+	mat3->AddTextureSRV("SurfaceTextureNormals", rockNormals);
+	mat3->AddSampler("BasicSamplerNormals", sampler4);
+	*/
+	mat2->AddTextureSRV("SurfaceTexture", rock);
+	mat2->AddSampler("BasicSampler", sampler3);
+	mat2->AddTextureSRV("SurfaceTextureNormals", rockNormals);
+	mat2->AddSampler("BasicSamplerNormals", sampler4);
 
 	CreateBasicGeometry();
 
@@ -123,6 +152,9 @@ void Game::LoadShaders()
 	vertexShader = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"VertexShader.cso").c_str());
 	pixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"PixelShader.cso").c_str());
 	pixelShader2 = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"CustomPS.cso").c_str());
+
+	vertexShaderNM = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"VertexShaderNM.cso").c_str());
+	pixelShaderNM = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"PixelShaderNormals.cso").c_str());
 }
 
 
@@ -142,11 +174,11 @@ void Game::CreateBasicGeometry()
 	shapeSix = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/quad.obj").c_str(), device, context);
 
 	//creating our 5 entitys
-	GameEntity* entityOne = new GameEntity(shapeOne.get(),mat1);
-	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat1);
-	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat2);
-	GameEntity* entityFour = new GameEntity(shapeFour.get(),mat2);
-	GameEntity* entityFive = new GameEntity(shapeFive.get(),mat2);
+	GameEntity* entityOne = new GameEntity(shapeOne.get(),mat2);
+	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat2);
+	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat3);
+	GameEntity* entityFour = new GameEntity(shapeFour.get(), mat3);
+	GameEntity* entityFive = new GameEntity(shapeFive.get(), mat3);
 	
 	//pushing entitys to list
 	listOfEntitys.push_back(entityOne);
@@ -246,14 +278,20 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
 	offset += .00001f;
+
 
 	pixelShader->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 	pixelShader2->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+	pixelShaderNM->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 
 	//pass in the UV offset
 	pixelShader->SetFloat("scale", offset);
-
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
 

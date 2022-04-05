@@ -43,6 +43,9 @@ private:
 	std::shared_ptr<SimplePixelShader> pixelShader;
 	std::shared_ptr<SimplePixelShader> pixelShader2;
 	std::shared_ptr<SimpleVertexShader> vertexShader;
+
+	std::shared_ptr<SimpleVertexShader> vertexShaderNM;
+	std::shared_ptr<SimplePixelShader> pixelShaderNM;
 	//materials
 	std::shared_ptr<Material> mat1;
 	std::shared_ptr<Material> mat2;

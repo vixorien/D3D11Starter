@@ -1,12 +1,5 @@
-
-
 #ifndef __GGP_SHADER_INCLUDES__ // Each .hlsli file needs a unique identifier! 
 #define __GGP_SHADER_INCLUDES__ 
-
-
-
-
-
 // Struct representing a single vertex worth of data
 // - This should match the vertex definition in our C++ code
 // - By "match", I mean the size, order and number of members
@@ -21,7 +14,9 @@ struct VertexShaderInput
 	//  v    v                v
 	float3 localPosition	: POSITION;     // XYZ position
 	float3 normal:NORMAL;
+	float3 tangent:TANGENT;
 	float2 uv:TEXCOORD;
+
 };
 
 // Struct representing the data we're sending down the pipeline
@@ -41,7 +36,20 @@ struct VertexToPixel
 	float3 normal			: NORMAL;
 	float3 worldPosition	: POSITION;	
 };
+struct VertexToPixelNormalMapping
+{
+	// Data type
+	//  |
+	//  |   Name          Semantic
+	//  |    |                |
+	//  v    v                v
+	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
+	float3 tangent			: TANGENT;
+	float3 normal			: NORMAL;
+	float3 worldPosition	: POSITION;
+	float2 uv				: TEXCOORD;
 
+};
 struct Light
 {
 	int Type;    // Which kind of light?  0, 1 or 2 (see above) 

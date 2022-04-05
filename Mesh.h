@@ -18,7 +18,8 @@ public:
 	Mesh(Vertex vertexArray[], int numberOfVerticesInArray, unsigned int indicesArray[], int numberOfIndicesInArray, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, Microsoft::WRL::ComPtr<ID3D11DeviceContext> context);
 	Mesh(const char* filename,Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, Microsoft::WRL::ComPtr<ID3D11DeviceContext> contextObject);
 	~Mesh();
-	void createBuffer(Vertex vertices[], int numOfVerts, unsigned int indices[], int numberOfIndices, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject);
+	void CreateBuffer(Vertex vertices[], int numOfVerts, unsigned int indices[], int numberOfIndices, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject);
+	void CalculateTangents(Vertex* verts, int numVerts, unsigned int* indices, int numIndices);
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();//return the pointer to the vertex buffer object
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 	int GetIndexCount();//returns the number of indices this mesh contains.

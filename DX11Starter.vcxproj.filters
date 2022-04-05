@@ -97,6 +97,12 @@
     <FxCompile Include="CustomPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="VertexShaderNM.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderNormals.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ShaderIncludes.hlsli">
