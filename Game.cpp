@@ -112,6 +112,11 @@ void Game::Init()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeMetal;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeNormals;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeRoughness;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorNormals;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorRoughness;
 	//set them
 	/*
 	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/rock.png").c_str(), 0, rock.GetAddressOf());
@@ -135,6 +140,11 @@ void Game::Init()
 	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_metal.png").c_str(), 0, bronzeMetal.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_normals.png").c_str(), 0, bronzeNormals.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_roughness.png").c_str(), 0, bronzeRoughness.GetAddressOf());
+
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/floor_albedo.png").c_str(), 0, floorAlbedo.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/floor_metal.png").c_str(), 0, floorMetal.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/floor_normals.png").c_str(), 0, floorNormals.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/floor_roughness.png").c_str(), 0, floorRoughness.GetAddressOf());
 	LoadShaders();
 
 	mat1 = std::make_shared<Material>(vertexShader, pixelShader, XMFLOAT3(1, 1, 1), .9f);
@@ -171,6 +181,13 @@ void Game::Init()
 	mat3->AddTextureSRV("NormalsMap", bronzeNormals);
 	mat3->AddTextureSRV("RoughnessMap", bronzeRoughness);
 	mat3->AddTextureSRV("MetalnessMap", bronzeMetal);
+
+	//set these up to use our new PBRs
+	mat2->AddSampler("BasicSampler", sampler);
+	mat2->AddTextureSRV("Albedo", floorAlbedo);
+	mat2->AddTextureSRV("NormalsMap", floorNormals);
+	mat2->AddTextureSRV("RoughnessMap", floorRoughness);
+	mat2->AddTextureSRV("MetalnessMap", floorMetal);
 
 	CreateBasicGeometry();
 
@@ -235,7 +252,7 @@ void Game::CreateBasicGeometry()
 	GameEntity* entityOne = new GameEntity(shapeOne.get(), mat4);
 	GameEntity* entityTwo = new GameEntity(shapeTwo.get(), mat5);
 	GameEntity* entityThree = new  GameEntity(shapeThree.get(), mat3);
-	GameEntity* entityFour = new GameEntity(shapeFour.get(), mat5);
+	GameEntity* entityFour = new GameEntity(shapeFour.get(), mat2);
 	GameEntity* entityFive = new GameEntity(shapeFive.get(), mat3);
 
 	//pushing entitys to list
@@ -270,12 +287,12 @@ void Game::LoadLights()
 	pointLight1.Type = 1;
 	pointLight2.Type = 1;
 	//pointing right
-	dirLight1.Direction = XMFLOAT3(1, 0, 0);
-	dirLight2.Direction = XMFLOAT3(-1, 0, 0);
-	dirLight3.Direction = XMFLOAT3(0, -1, 0);
+	dirLight1.Direction = XMFLOAT3(0, -1, -1);
+	dirLight2.Direction = XMFLOAT3(-1, -0.25f, 0);
+	dirLight3.Direction = XMFLOAT3(1, -1, 1);
 	/// /////color////////////////
-	dirLight1.Color = XMFLOAT3(1, 1, 1);
-	dirLight2.Color = XMFLOAT3(0, 1, 0);
+	dirLight1.Color = XMFLOAT3(0.2f, 0.2f, 0.2f);
+	dirLight2.Color = XMFLOAT3(0.8f, 0.8f, 0.8f);
 	dirLight3.Color = XMFLOAT3(0, 0, 1);
 	pointLight1.Color = XMFLOAT3(.5, .5, .5);
 	pointLight2.Color = XMFLOAT3(1, 1, 1);
@@ -294,8 +311,8 @@ void Game::LoadLights()
 	lights.push_back(dirLight1);
 	lights.push_back(dirLight2);
 	lights.push_back(dirLight3);
-	lights.push_back(pointLight1);
-	lights.push_back(pointLight2);
+	//lights.push_back(pointLight1);
+	//lights.push_back(pointLight2);
 }
 
 void Game::LoadTexturesSRVsAndSampler()

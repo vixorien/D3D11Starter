@@ -1,7 +1,6 @@
-
 #include "ShaderIncludes.hlsli" 
 #include "Lighting.hlsli"
-#define NUM_LIGHTS 5
+#define NUM_LIGHTS 3
 
 cbuffer ExternalData : register(b0)
 {
@@ -13,16 +12,11 @@ cbuffer ExternalData : register(b0)
 
 }
 
-
 Texture2D Albedo : register(t0);
 Texture2D NormalMap : register(t1);
 Texture2D RoughnessMap : register(t2);
 Texture2D MetalnessMap : register(t3);
 SamplerState BasicSampler : register(s0);
-
-
-
-
 
 //=============================================================================
 //uvs scaled by 4
@@ -31,10 +25,9 @@ float4 main(VertexToPixelNormalMapping input) : SV_TARGET
 	///////////////////////////////////////////////////////////////////////////////
 	////////////////////////normal/////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
-
 	input.normal = normalize(input.normal);
 	//get our unpacked normals which we get by converting the color
-	float3 unpackedNormal = NormalMap.Sample(BasicSampler, input.uv*4).rgb * 2 - 1;
+	float3 unpackedNormal = NormalMap.Sample(BasicSampler, input.uv).rgb * 2 - 1;
 
 	// Simplifications include not re-normalizing the same vector more than once!
 	float3 N = normalize(input.normal); // Must be normalized here or before
@@ -50,23 +43,20 @@ float4 main(VertexToPixelNormalMapping input) : SV_TARGET
 	//////////////////////////surface///////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////
 	//get our surfaceColor(texture) albedo
-	float3 surfaceColor = pow(Albedo.Sample(BasicSampler, input.uv *4).rgb,2.2);
+	float3 surfaceColor = pow(Albedo.Sample(BasicSampler, input.uv).rgb,2.2);
 	//multiply our surface color by our colorTint to make sure its blended good 
-	surfaceColor *= colorTint;
+	//surfaceColor *= colorTint;
 	///////////////////////////////////////////////////////////////////////////////
 	//////////////////////////roughness(used for Cook)////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//do not gamma correct
-	float roughness = RoughnessMap.Sample(BasicSampler, input.uv).r;
+	float rough = RoughnessMap.Sample(BasicSampler, input.uv).r;
 	///////////////////////////////////////////////////////////////////////////////
 	//////////////////////////Metalness(used for specColor)////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	//do not gamma correct
-	float metalness = MetalnessMap.Sample(BasicSampler, input.uv).r;
-	////////////////////////////////////////////////////////////////////
-	/////////////////////////Ambient////////////////////////////////////
-	////////////////////////////////////////////////////////////////////
-	float3 lightTotal = ambient * surfaceColor;
+	float metal = MetalnessMap.Sample(BasicSampler, input.uv).r;
+	
 	///////////////////////////////////////////////////////////////////////////
 	/////////////////////////specular color(used for Cook)////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////
@@ -75,7 +65,11 @@ float4 main(VertexToPixelNormalMapping input) : SV_TARGET
 	//
 	// Note the use of lerp here - metal is generally 0 or 1, but might be in between
 	// because of linear texture sampling, so we lerp the specular color to match
-	float3 specularColor = lerp(F0_NON_METAL.rrr, surfaceColor.rgb, metalness);
+	float3 specularColor = lerp(F0_NON_METAL.rrr, surfaceColor.rgb, metal);
+	////////////////////////////////////////////////////////////////////
+	/////////////////////////Ambient////////////////////////////////////
+	////////////////////////////////////////////////////////////////////
+	float3 lightTotal = ambient * surfaceColor;
 	////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////
@@ -91,11 +85,11 @@ float4 main(VertexToPixelNormalMapping input) : SV_TARGET
 		switch (lights[i].Type)
 		{
 		case LIGHT_TYPE_DIRECTIONAL:
-			lightTotal += CreateDirectionalLightFancy(lights[i], input.normal, roughness, surfaceColor, cameraPosition, input.worldPosition,specularColor,metalness);
+			lightTotal += CreateDirectionalLightFancy(lights[i], input.normal, rough, surfaceColor, cameraPosition, input.worldPosition,specularColor,metal);
 			break;
 
 		case LIGHT_TYPE_POINT:
-			lightTotal += CreatePointLightFancy(lights[i], input.normal, roughness, surfaceColor, cameraPosition, input.worldPosition, specularColor, metalness);
+			lightTotal += CreatePointLightFancy(lights[i], input.normal, rough, surfaceColor, cameraPosition, input.worldPosition, specularColor, metal);
 			break;
 		}
 		
