@@ -1,6 +1,6 @@
 #include "ShaderIncludes.hlsli" 
 #include "Lighting.hlsli" 
-#define NUM_LIGHTS 5
+#define NUM_LIGHTS 1
 
 cbuffer ExternalData : register(b0)
 {
@@ -24,8 +24,8 @@ float4 main(VertexToPixel input) : SV_TARGET
 	input.uv += scale;
 
 
-	//get our surfaceColor(texture)
-	float3 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv*2).rgb;
+	//get our surfaceColor(texture) and uncorrect gamma because if not we have already gamma corrected  image getting GCd again
+	float3 surfaceColor = pow(SurfaceTexture.Sample(BasicSampler, input.uv*2).rgb,2.2);
 	//multiply our surface color by our colorTint
 	surfaceColor *= colorTint;
 
@@ -56,7 +56,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	}
 	///////////////////////////////////////////////////////////
 	float3 finalPixelColor = lightTotal;
-	return float4(finalPixelColor, 1);
+	return float4(pow(finalPixelColor, 1.0f/2.2f), 1);
 
 
 }

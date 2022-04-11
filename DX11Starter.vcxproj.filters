@@ -16,6 +16,15 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{e76f01f5-08db-40d4-8720-b5b21f7ec0a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\normals">
+      <UniqueIdentifier>{5b443f10-5c6e-4f50-b497-73b4094ceb75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\basic">
+      <UniqueIdentifier>{203f93e2-2939-4acd-9de9-cf02b636c30a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\skybox">
+      <UniqueIdentifier>{c0126566-1991-4b0e-8d6a-98519f8d2e69}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXCore.cpp">
@@ -49,6 +58,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lights.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sky.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,22 +98,28 @@
     <ClInclude Include="Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sky.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\basic</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="CustomPS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\basic</Filter>
     </FxCompile>
     <FxCompile Include="VertexShaderNM.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\normals</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShaderNormals.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="CustomPS.hlsl">
+      <Filter>Shaders\normals</Filter>
+    </FxCompile>
+    <FxCompile Include="skyVS.hlsl">
+      <Filter>Shaders\skybox</Filter>
+    </FxCompile>
+    <FxCompile Include="skyPS.hlsl">
+      <Filter>Shaders\skybox</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

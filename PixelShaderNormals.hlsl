@@ -17,14 +17,14 @@ Texture2D SurfaceTexture : register(t0); // "t" registers for textures
 SamplerState BasicSampler : register(s0); // "s" registers for samplers
 //normals of texture
 Texture2D SurfaceTextureNormals : register(t1); 
-SamplerState BasicSamplerNormals : register(s1);
+
 
 
 
 float4 main(VertexToPixelNormalMapping input) : SV_TARGET
 {
 	//get our unpacked normals which we get by converting the color
-	float3 unpackedNormal = SurfaceTextureNormals.Sample(BasicSamplerNormals, input.uv).rgb * 2 - 1;
+	float3 unpackedNormal = SurfaceTextureNormals.Sample(BasicSampler, input.uv).rgb * 2 - 1;
 
 	// Simplifications include not re-normalizing the same vector more than once!
 	float3 N = normalize(input.normal); // Must be normalized here or before

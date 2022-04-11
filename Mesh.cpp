@@ -5,10 +5,12 @@
 
 using namespace DirectX;
 
-void Mesh::CreateBuffer(Vertex vertices[], int numOfVerts, unsigned int indices[], int numberOfIndices, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject)
+void Mesh::CreateBuffer(Vertex* vertices, int numOfVerts, unsigned int* indices, int numberOfIndices, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject)
 {
 	//make sure we make our tangents go brrrrrrrrrrrrrrrrrr
 	CalculateTangents(vertices, numOfVerts, indices, numberOfIndices);
+
+
 	numOfIndices = numberOfIndices;
 	// Create the VERTEX BUFFER description -----------------------------------
 	// - The description is created on the stack because we only need
@@ -48,7 +50,7 @@ void Mesh::CreateBuffer(Vertex vertices[], int numOfVerts, unsigned int indices[
 	deviceObject->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
 }
 //creating our two buffered arrays using this data
-Mesh::Mesh(Vertex vertices[], int numberOfVerticesInArray, unsigned int indices[], int numberOfIndicesInArray, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, Microsoft::WRL::ComPtr<ID3D11DeviceContext> contextObject)
+Mesh::Mesh(Vertex* vertices, int numberOfVerticesInArray, unsigned int* indices, int numberOfIndicesInArray, Microsoft::WRL::ComPtr<ID3D11Device> deviceObject, Microsoft::WRL::ComPtr<ID3D11DeviceContext> contextObject)
 {
 	//setting our member variable to the correct object
 	context = contextObject;

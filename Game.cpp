@@ -8,6 +8,7 @@
 #include "GameEntity.h"
 #include "Material.h"
 #include "WICTextureLoader.h"
+#include "DDSTextureLoader.h"
 
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
@@ -56,6 +57,7 @@ Game::~Game()
 	for (auto& e : listOfEntitys) { delete e; }
 
 
+
 }
 
 // --------------------------------------------------------
@@ -85,46 +87,90 @@ void Game::Init()
 	//
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler4;
 	device->CreateSamplerState(&sampDesc, sampler4.GetAddressOf());
-
 	//now that we have sampler state  load our textures
 	//hold out textures 
+	/*
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rock;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockNormals;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brick;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brickNormals;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushion;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushionNormals;
+	*/
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> skyMap;
 
+	//PBRS
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodNormals;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodRoughness;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedNormals;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedRoughness;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeAlbedo;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeMetal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeNormals;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeRoughness;
 	//set them
+	/*
 	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/rock.png").c_str(), 0, rock.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/rock_normals.png").c_str(), 0, rockNormals.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cobblestone.png").c_str(), 0, brick.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cushion.png").c_str(), 0, cushion.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cushion_normals.png").c_str(), 0, cushionNormals.GetAddressOf());
+	*/
+	CreateDDSTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/BrightSky.dds").c_str(), 0, skyMap.GetAddressOf());
+	//setting PBRs
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/wood_albedo.png").c_str(), 0, woodAlbedo.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/wood_metal.png").c_str(), 0, woodMetal.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/wood_normals.png").c_str(), 0, woodNormals.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/wood_roughness.png").c_str(), 0, woodRoughness.GetAddressOf());
 
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/scratched_albedo.png").c_str(), 0, scratchedAlbedo.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/scratched_metal.png").c_str(), 0, scratchedMetal.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/scratched_normals.png").c_str(), 0, scratchedNormals.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/scratched_roughness.png").c_str(), 0, scratchedRoughness.GetAddressOf());
 
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_albedo.png").c_str(), 0, bronzeAlbedo.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_metal.png").c_str(), 0, bronzeMetal.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_normals.png").c_str(), 0, bronzeNormals.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/PBR/bronze_roughness.png").c_str(), 0, bronzeRoughness.GetAddressOf());
 	LoadShaders();
 
-
 	mat1 = std::make_shared<Material>(vertexShader, pixelShader, XMFLOAT3(1, 1, 1), .9f);
-	/*
-	mat2 = std::make_shared<Material>(vertexShader, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
-	*/
+
 	mat2 = std::make_shared<Material>(vertexShaderNM, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
-	mat3 = std::make_shared<Material>(vertexShaderNM, pixelShaderNM, XMFLOAT3(1, 1, 1), 1.0f);
-	//set the resources for this material
-	mat1->AddTextureSRV("SurfaceTexture", rock);
-	mat1->AddSampler("BasicSampler", sampler);
-	//set the resources for this material
+	mat3 = std::make_shared<Material>(vertexShaderNM, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
+
+	mat4 = std::make_shared<Material>(vertexShaderNM, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
+	mat5 = std::make_shared<Material>(vertexShaderNM, pixelShader2, XMFLOAT3(1, 1, 1), 1.0f);
+
 	/*
-	mat2->AddTextureSRV("SurfaceTexture", brick);
-	mat2->AddSampler("BasicSampler", sampler2);
-	//set resources for material
-	mat3->AddTextureSRV("SurfaceTexture", rock);
-	mat3->AddSampler("BasicSampler", sampler3);
-	mat3->AddTextureSRV("SurfaceTextureNormals", rockNormals);
-	mat3->AddSampler("BasicSamplerNormals", sampler4);
+	//set the resources for this material
+	mat1->AddTextureSRV("SurfaceTexture", rock);//rock
+	mat1->AddSampler("BasicSampler", sampler);
 	*/
-	mat2->AddTextureSRV("SurfaceTexture", rock);
-	mat2->AddSampler("BasicSampler", sampler3);
-	mat2->AddTextureSRV("SurfaceTextureNormals", rockNormals);
-	mat2->AddSampler("BasicSamplerNormals", sampler4);
+
+	//set these up to use our new PBRs
+	mat4->AddSampler("BasicSampler", sampler2);
+	mat4->AddTextureSRV("Albedo", woodAlbedo);
+	mat4->AddTextureSRV("NormalsMap", woodNormals);
+	mat4->AddTextureSRV("RoughnessMap", woodRoughness);
+	mat4->AddTextureSRV("MetalnessMap", woodMetal);
+
+	//set these up to use our new PBRs
+	mat5->AddSampler("BasicSampler", sampler);
+	mat5->AddTextureSRV("Albedo", scratchedAlbedo);
+	mat5->AddTextureSRV("NormalsMap", scratchedNormals);
+	mat5->AddTextureSRV("RoughnessMap", scratchedRoughness);
+	mat5->AddTextureSRV("MetalnessMap", scratchedMetal);
+
+	//set these up to use our new PBRs
+	mat3->AddSampler("BasicSampler", sampler);
+	mat3->AddTextureSRV("Albedo", bronzeAlbedo);
+	mat3->AddTextureSRV("NormalsMap", bronzeNormals);
+	mat3->AddTextureSRV("RoughnessMap", bronzeRoughness);
+	mat3->AddTextureSRV("MetalnessMap", bronzeMetal);
 
 	CreateBasicGeometry();
 
@@ -134,9 +180,14 @@ void Game::Init()
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//create our camera
-	camera = std::make_shared<Camera>(0.0f, 0.0f, -5.0f, (float)width / height);
+	camera = std::make_shared<Camera>(0.0f, 0.0f, -0.0f, (float)width / height);
 
 	LoadLights();
+
+
+	//make sky
+
+	skyObj = std::make_shared<Sky>(device, sampler4, skyMap, shapeThree, vertexShaderSky, pixelShaderSky);
 }
 
 // --------------------------------------------------------
@@ -151,10 +202,13 @@ void Game::LoadShaders()
 {
 	vertexShader = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"VertexShader.cso").c_str());
 	pixelShader = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"PixelShader.cso").c_str());
-	pixelShader2 = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"CustomPS.cso").c_str());
 
+	vertexShaderSky = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"skyVS.cso").c_str());
+	pixelShaderSky = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"skyPS.cso").c_str());
+
+	pixelShader2 = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"CustomPS.cso").c_str());
 	vertexShaderNM = std::make_shared<SimpleVertexShader>(device, context, GetFullPathTo_Wide(L"VertexShaderNM.cso").c_str());
-	pixelShaderNM = std::make_shared<SimplePixelShader>(device, context, GetFullPathTo_Wide(L"PixelShaderNormals.cso").c_str());
+
 }
 
 
@@ -166,27 +220,31 @@ void Game::CreateBasicGeometry()
 {
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
-	shapeOne = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device,context);
-	shapeTwo = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/torus.obj").c_str(), device,context);
-	shapeThree = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device,context);
+	shapeOne = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device, context);
+	shapeTwo = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/torus.obj").c_str(), device, context);
+	shapeThree = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device, context);
 	shapeFour = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/cylinder.obj").c_str(), device, context);
 	shapeFive = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device, context);
 	shapeSix = std::make_shared<Mesh>(GetFullPathTo("../../Assets/Models/quad.obj").c_str(), device, context);
 
+	//shapeSix->Scale(2, 2, 2);
+
+
+
 	//creating our 5 entitys
-	GameEntity* entityOne = new GameEntity(shapeOne.get(),mat2);
-	GameEntity* entityTwo = new GameEntity(shapeTwo.get(),mat2);
-	GameEntity* entityThree = new  GameEntity(shapeThree.get(),mat3);
-	GameEntity* entityFour = new GameEntity(shapeFour.get(), mat3);
+	GameEntity* entityOne = new GameEntity(shapeOne.get(), mat4);
+	GameEntity* entityTwo = new GameEntity(shapeTwo.get(), mat5);
+	GameEntity* entityThree = new  GameEntity(shapeThree.get(), mat3);
+	GameEntity* entityFour = new GameEntity(shapeFour.get(), mat5);
 	GameEntity* entityFive = new GameEntity(shapeFive.get(), mat3);
-	
+
 	//pushing entitys to list
 	listOfEntitys.push_back(entityOne);
 	listOfEntitys.push_back(entityTwo);
 	listOfEntitys.push_back(entityThree);
 	listOfEntitys.push_back(entityFour);
 	listOfEntitys.push_back(entityFive);
-	
+
 	//making sure we put them in a good spot
 	listOfEntitys[0]->getTransform()->SetPosition(0, 0, 0);
 	listOfEntitys[1]->getTransform()->SetPosition(-2.5, 0, 0);
@@ -216,13 +274,13 @@ void Game::LoadLights()
 	dirLight2.Direction = XMFLOAT3(-1, 0, 0);
 	dirLight3.Direction = XMFLOAT3(0, -1, 0);
 	/// /////color////////////////
-	dirLight1.Color = XMFLOAT3(.5, .5, .5);
-	dirLight2.Color = XMFLOAT3(.5, .5, .5);
-	dirLight3.Color = XMFLOAT3(.5, .5, .5);
+	dirLight1.Color = XMFLOAT3(1, 1, 1);
+	dirLight2.Color = XMFLOAT3(0, 1, 0);
+	dirLight3.Color = XMFLOAT3(0, 0, 1);
 	pointLight1.Color = XMFLOAT3(.5, .5, .5);
 	pointLight2.Color = XMFLOAT3(1, 1, 1);
 	/// //////intensity/////////////
-	dirLight1.Intensity = .71;
+	dirLight1.Intensity = .8;
 	dirLight2.Intensity = .51;
 	dirLight3.Intensity = .41;
 	pointLight1.Intensity = .1;
@@ -242,9 +300,9 @@ void Game::LoadLights()
 
 void Game::LoadTexturesSRVsAndSampler()
 {
-	
 
-	
+
+
 }
 
 
@@ -279,19 +337,17 @@ void Game::Update(float deltaTime, float totalTime)
 void Game::Draw(float deltaTime, float totalTime)
 {
 	///////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////Baic shader///////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 	offset += .00001f;
-
-
-	pixelShader->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
-	pixelShader2->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
-	pixelShaderNM->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
-
-	//pass in the UV offset
 	pixelShader->SetFloat("scale", offset);
+	pixelShader->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
+	///////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////Normals///////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	pixelShader2->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 	///////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
-	
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
 
@@ -304,7 +360,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-	
+
+
 	//loop through and draw our entitys
 	for (int i = 0; i < listOfEntitys.size(); i++) {
 		//going to pass this jawn over to our shader here because for some reason this doesnt belong in entity class but wouldnt it make more sense to pass the ambient color into the entity instead of creating a seperation of tasks that just doesnt make a whole lot of sense, Yeah i get it, this is probably a little less cpu power but im not sure if its worth the loss in coesive code
@@ -313,7 +370,10 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		listOfEntitys[i]->Draw(context, camera);
 	}
-	
+	//draw sky here
+	{
+		skyObj->Draw(context, camera);
+	}
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)

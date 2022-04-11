@@ -25,7 +25,7 @@ VertexToPixelNormalMapping main(VertexShaderInput input)
 
 	output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
 	output.normal = mul((float3x3)invTransposeWorldMatrix, input.normal);
-	output.tangent = mul((float3x3)invTransposeWorldMatrix, input.normal);
+	output.tangent = mul((float3x3)invTransposeWorldMatrix, input.tangent);
 	output.worldPosition = mul(worldMatrix, float4(input.localPosition, 1)).xyz;
 	output.uv = input.uv;
 

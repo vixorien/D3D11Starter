@@ -8,6 +8,7 @@
 #include "SimpleShader.h"
 #include "Material.h"
 #include "Lights.h"
+#include "Sky.h"
 class Game 
 	: public DXCore
 {
@@ -28,6 +29,7 @@ public:
 
 private:
 	std::vector<GameEntity*> listOfEntitys;
+	//entity
 	//shapes and meshes
 	std::shared_ptr<Mesh> shapeOne;
 	std::shared_ptr<Mesh> shapeTwo;
@@ -46,13 +48,21 @@ private:
 
 	std::shared_ptr<SimpleVertexShader> vertexShaderNM;
 	std::shared_ptr<SimplePixelShader> pixelShaderNM;
+
+	std::shared_ptr<SimpleVertexShader> vertexShaderSky;
+	std::shared_ptr<SimplePixelShader> pixelShaderSky;
 	//materials
 	std::shared_ptr<Material> mat1;
 	std::shared_ptr<Material> mat2;
 	std::shared_ptr<Material> mat3;
+	std::shared_ptr<Material> mat4;
+	std::shared_ptr<Material> mat5;
+	std::shared_ptr<Material> matSky;
 	//lights and light data
 	XMFLOAT3 ambientColor;
 	std::vector<Light> lights;
+	//sky
+	std::shared_ptr<Sky> skyObj;
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
 

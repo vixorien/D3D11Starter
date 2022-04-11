@@ -13,12 +13,17 @@ struct VertexShaderInput
 	//  |    |                |
 	//  v    v                v
 	float3 localPosition	: POSITION;     // XYZ position
+	float2 uv:TEXCOORD;
 	float3 normal:NORMAL;
 	float3 tangent:TANGENT;
-	float2 uv:TEXCOORD;
+
 
 };
-
+struct VertexToPixelSky
+{
+	float4 position : SV_POSITION;
+	float3 sampleDir : DIRECTION;
+};
 // Struct representing the data we're sending down the pipeline
 // - Should match our pixel shader's input (hence the name: Vertex to Pixel)
 // - At a minimum, we need a piece of data defined tagged as SV_POSITION
@@ -44,10 +49,11 @@ struct VertexToPixelNormalMapping
 	//  |    |                |
 	//  v    v                v
 	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
-	float3 tangent			: TANGENT;
-	float3 normal			: NORMAL;
-	float3 worldPosition	: POSITION;
 	float2 uv				: TEXCOORD;
+	float3 normal			: NORMAL;
+	float3 tangent : TANGENT;
+	float3 worldPosition	: POSITION;
+
 
 };
 struct Light
