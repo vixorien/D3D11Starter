@@ -164,28 +164,28 @@ void Game::Init()
 	//set these up to use our new PBRs
 	mat4->AddSampler("BasicSampler", sampler2);
 	mat4->AddTextureSRV("Albedo", woodAlbedo);
-	mat4->AddTextureSRV("NormalsMap", woodNormals);
+	mat4->AddTextureSRV("NormalMap", woodNormals);
 	mat4->AddTextureSRV("RoughnessMap", woodRoughness);
 	mat4->AddTextureSRV("MetalnessMap", woodMetal);
 
 	//set these up to use our new PBRs
 	mat5->AddSampler("BasicSampler", sampler);
 	mat5->AddTextureSRV("Albedo", scratchedAlbedo);
-	mat5->AddTextureSRV("NormalsMap", scratchedNormals);
+	mat5->AddTextureSRV("NormalMap", scratchedNormals);
 	mat5->AddTextureSRV("RoughnessMap", scratchedRoughness);
 	mat5->AddTextureSRV("MetalnessMap", scratchedMetal);
 
 	//set these up to use our new PBRs
 	mat3->AddSampler("BasicSampler", sampler);
 	mat3->AddTextureSRV("Albedo", bronzeAlbedo);
-	mat3->AddTextureSRV("NormalsMap", bronzeNormals);
+	mat3->AddTextureSRV("NormalMap", bronzeNormals);
 	mat3->AddTextureSRV("RoughnessMap", bronzeRoughness);
 	mat3->AddTextureSRV("MetalnessMap", bronzeMetal);
 
 	//set these up to use our new PBRs
 	mat2->AddSampler("BasicSampler", sampler);
 	mat2->AddTextureSRV("Albedo", floorAlbedo);
-	mat2->AddTextureSRV("NormalsMap", floorNormals);
+	mat2->AddTextureSRV("NormalMap", floorNormals);
 	mat2->AddTextureSRV("RoughnessMap", floorRoughness);
 	mat2->AddTextureSRV("MetalnessMap", floorMetal);
 
@@ -287,11 +287,11 @@ void Game::LoadLights()
 	pointLight1.Type = 1;
 	pointLight2.Type = 1;
 	//pointing right
-	dirLight1.Direction = XMFLOAT3(0, -1, -1);
+	dirLight1.Direction = XMFLOAT3(1, 1, 0);
 	dirLight2.Direction = XMFLOAT3(-1, -0.25f, 0);
 	dirLight3.Direction = XMFLOAT3(1, -1, 1);
 	/// /////color////////////////
-	dirLight1.Color = XMFLOAT3(0.2f, 0.2f, 0.2f);
+	dirLight1.Color = XMFLOAT3(0.8f, 0.8f, 0.8f);
 	dirLight2.Color = XMFLOAT3(0.8f, 0.8f, 0.8f);
 	dirLight3.Color = XMFLOAT3(0, 0, 1);
 	pointLight1.Color = XMFLOAT3(.5, .5, .5);
