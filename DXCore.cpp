@@ -1,6 +1,10 @@
 #include "DXCore.h"
 #include "Input.h"
 #include <WindowsX.h>
+// Assumes files are in "imgui" subfolder!
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_dx11.h"
+#include "imgui/imgui_impl_win32.h"
 #include <sstream>
 
 // Define the static instance variable so our OS-level 

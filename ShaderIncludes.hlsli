@@ -12,10 +12,10 @@ struct VertexShaderInput
 	//  |   Name          Semantic
 	//  |    |                |
 	//  v    v                v
-	float3 localPosition	: POSITION;     // XYZ position
-	float2 uv:TEXCOORD;
-	float3 normal:NORMAL;
-	float3 tangent:TANGENT;
+	float3 localPosition : POSITION; // XYZ position
+	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
+	float3 tangent : TANGENT;
 
 
 };
@@ -36,10 +36,10 @@ struct VertexToPixel
 	//  |   Name          Semantic
 	//  |    |                |
 	//  v    v                v
-	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
-	float2 uv				: TEXCOORD;
-	float3 normal			: NORMAL;
-	float3 worldPosition	: POSITION;	
+	float4 screenPosition : SV_POSITION; // XYZW position (System Value Position)
+	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
+	float3 worldPosition : POSITION;
 };
 struct VertexToPixelNormalMapping
 {
@@ -48,23 +48,23 @@ struct VertexToPixelNormalMapping
 	//  |   Name          Semantic
 	//  |    |                |
 	//  v    v                v
-	float4 screenPosition	: SV_POSITION;	// XYZW position (System Value Position)
-	float2 uv				: TEXCOORD;
-	float3 normal			: NORMAL;
+	float4 screenPosition : SV_POSITION; // XYZW position (System Value Position)
+	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
 	float3 tangent : TANGENT;
-	float3 worldPosition	: POSITION;
+	float3 worldPosition : POSITION;
 
 
 };
 struct Light
 {
-	int Type;    // Which kind of light?  0, 1 or 2 (see above) 
+	int Type; // Which kind of light?  0, 1 or 2 (see above) 
 	float3 Direction; // Directional and Spot lights need a direction 
-	float Range;  // Point and Spot lights have a max range for attenuation 
+	float Range; // Point and Spot lights have a max range for attenuation 
 	float3 Position; // Point and Spot lights have a position in space 
-	float Intensity;  // All lights need an intensity 
-	float3 Color;   // All lights need a color 
-	float SpotFalloff;  // Spot lights need a value to define their “cone” size 
+	float Intensity; // All lights need an intensity 
+	float3 Color; // All lights need a color 
+	float SpotFalloff; // Spot lights need a value to define their “cone” size 
 	float3 Padding;
 
 };

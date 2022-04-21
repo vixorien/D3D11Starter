@@ -20,7 +20,7 @@ public:
 	// Overridden setup and game loop methods, which
 	// will be called automatically
 	void Init();
-	void OnResize();
+	void initImGui();
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
 	//creating our 3 meshes for our shapes
@@ -65,14 +65,14 @@ private:
 	std::shared_ptr<Sky> skyObj;
 	// Should we use vsync to limit the frame rate?
 	bool vsync;
-
 	float offset;
 	// Initialization helper methods - feel free to customize, combine, etc.
 	void LoadShaders(); 
 	void CreateBasicGeometry();
 	void LoadLights();
 	void LoadTexturesSRVsAndSampler();
-
+	void CreateEntitys();
+	void OnResize();
 	
 
 	
