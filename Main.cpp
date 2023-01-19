@@ -11,7 +11,7 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,				// Command line params
 	_In_ int nCmdShow)					// How the window should be shown (we ignore this)
 {
-#if defined(DEBUG) | defined(_DEBUG)
+#if defined(DEBUG) | defined(_DEBUG) // Pre-compilation macro
 	// Enable memory leak detection as a quick and dirty
 	// way of determining if we forgot to clean something up
 	//  - You may want to use something more advanced, like Visual Leak Detector
@@ -20,7 +20,7 @@ int WINAPI WinMain(
 
 	// Create the Game object using
 	// the app handle we got from WinMain
-	Game dxGame(hInstance);
+	Game dxGame(hInstance); // Creates Game on the stack
 
 	// Result variable for function calls below
 	HRESULT hr = S_OK;
@@ -36,6 +36,6 @@ int WINAPI WinMain(
 	if(FAILED(hr)) return hr;
 
 	// Begin the message and game loop, and then return
-	// whatever we get back once the game loop is over
+	// whatever we get back once the game loop is over (potentially an error code)
 	return dxGame.Run();
 }

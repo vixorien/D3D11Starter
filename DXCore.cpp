@@ -37,7 +37,7 @@ DXCore::DXCore(
 	bool vsync,					// Sync the framerate to the monitor?
 	bool debugTitleBarStats) 	// Show extra stats (fps) in title bar?
 	:
-	hInstance(hInstance),
+	hInstance(hInstance), // Using initializer list, hInstance(hInstance) is the same as this->hInstance = hInstance;
 	titleBarText(titleBarText),
 	windowWidth(windowWidth),
 	windowHeight(windowHeight),
@@ -62,7 +62,7 @@ DXCore::DXCore(
 	//  - (Yes, a singleton might be a safer choice here).
 	DXCoreInstance = this;
 
-	// Query performance counter for accurate timing information
+	// Query performance counter for accurate timing information (better than framerate)
 	__int64 perfFreq = 0;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&perfFreq);
 	perfCounterSeconds = 1.0 / (double)perfFreq;
@@ -91,7 +91,7 @@ HRESULT DXCore::InitWindow()
 	// appropriate window class struct
 	WNDCLASS wndClass		= {}; // Zero out the memory
 	wndClass.style			= CS_HREDRAW | CS_VREDRAW;	// Redraw on horizontal or vertical movement/adjustment
-	wndClass.lpfnWndProc	= DXCore::WindowProc;
+	wndClass.lpfnWndProc	= DXCore::WindowProc; // Pointer to function that will send/recieve OS messages
 	wndClass.cbClsExtra		= 0;
 	wndClass.cbWndExtra		= 0;
 	wndClass.hInstance		= hInstance;						// Our app's handle
@@ -101,7 +101,7 @@ HRESULT DXCore::InitWindow()
 	wndClass.lpszMenuName	= NULL;
 	wndClass.lpszClassName	= L"Direct3DWindowClass"; // The "L" means this is a wide-character string
 
-	// Attempt to register the window class we've defined
+	// Attempt to register the window class we've defined (will the OS allow us to make this window?)
 	if (!RegisterClass(&wndClass))
 	{
 		// Get the most recent error
@@ -205,7 +205,7 @@ HRESULT DXCore::InitDirect3D()
 	swapDesc.BufferDesc.Height	= windowHeight;
 	swapDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapDesc.BufferDesc.RefreshRate.Denominator = 1;
-	swapDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapDesc.BufferDesc.Format	= DXGI_FORMAT_R8G8B8A8_UNORM; // unsigned normalized 
 	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	swapDesc.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -214,13 +214,13 @@ HRESULT DXCore::InitDirect3D()
 	swapDesc.SampleDesc.Count	= 1;
 	swapDesc.SampleDesc.Quality = 0;
 	swapDesc.SwapEffect			= DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapDesc.Windowed			= true;
+	swapDesc.Windowed			= true; // not fullscreen
 
 	// Result variable for below function calls
 	HRESULT hr = S_OK;
 
 	// Attempt to initialize Direct3D
-	hr = D3D11CreateDeviceAndSwapChain(
+	hr = D3D11CreateDeviceAndSwapChain( // global function to turn on DirectX. Sets the values for swapChain, device, and context pointer pointers
 		0,							// Video adapter (physical GPU) to use, or null for default
 		D3D_DRIVER_TYPE_HARDWARE,	// We want to use the hardware (GPU)
 		0,							// Used when doing software rendering
@@ -290,7 +290,7 @@ HRESULT DXCore::InitDirect3D()
 
 	// Lastly, set up a viewport so we render into
 	// to correct portion of the window
-	D3D11_VIEWPORT viewport = {};
+	D3D11_VIEWPORT viewport = {}; // Viewport = the part of the window that we're actually rendering to
 	viewport.TopLeftX	= 0;
 	viewport.TopLeftY	= 0;
 	viewport.Width		= (float)windowWidth;
@@ -412,7 +412,7 @@ HRESULT DXCore::Run()
 
 	// Our overall game and message loop
 	MSG msg = {};
-	while (msg.message != WM_QUIT)
+	while (msg.message != WM_QUIT) // "While we're not quitting, do stuff"
 	{
 		// Determine if there is a message waiting
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
