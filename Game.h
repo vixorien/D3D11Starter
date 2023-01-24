@@ -1,6 +1,8 @@
 #pragma once
 
 #include "DXCore.h"
+#include "Mesh.h"
+#include <memory>
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 
@@ -38,6 +40,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+
+	std::shared_ptr<Mesh> triangle;
 
 };
 
