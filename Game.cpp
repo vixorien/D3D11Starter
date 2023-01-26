@@ -166,35 +166,50 @@ void Game::CreateGeometry()
 	XMFLOAT4 red	= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 green	= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	XMFLOAT4 blue	= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	XMFLOAT4 gold = XMFLOAT4(1.0f, 0.84f, 0.0f, 1.0f);
 
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in CPU memory
-	//    over to a Direct3D-controlled data structure on the GPU (the vertex buffer)
-	// - Note: Since we don't have a camera or really any concept of
-	//    a "3d world" yet, we're simply describing positions within the
-	//    bounds of how the rasterizer sees our screen: [-1 to +1] on X and Y
-	// - This means (0,0) is at the very center of the screen.
-	// - These are known as "Normalized Device Coordinates" or "Homogeneous 
-	//    Screen Coords", which are ways to describe a position without
-	//    knowing the exact size (in pixels) of the image/window/etc.  
-	// - Long story short: Resizing the window also resizes the triangle,
-	//    since we're describing the triangle in terms of the window itself
-	Vertex vertices[] =
+	// Creating triangle variables
+	Vertex triangleVertices[] =
 	{
 		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
 		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
 		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
 	};
 
-	// Set up indices, which tell us which vertices to use and in which order
-	// - This is redundant for just 3 vertices, but will be more useful later
-	// - Indices are technically not required if the vertices are in the buffer 
-	//    in the correct order and each one will be used exactly once
-	// - But just to see how it's done...
-	unsigned int indices[] = { 0, 1, 2 };
+	unsigned int triangleIndices[] = { 0, 1, 2 };
 
+	// Creating Sierpinski triangle/triforce variables
+	Vertex sierpinskiVertices[] =
+	{
+		{ XMFLOAT3(-0.3f, +0.0f, +0.0f), gold },
+		{ XMFLOAT3(-0.6f, +0.0f, +0.0f), gold },
+		{ XMFLOAT3(-0.45f, +0.26f, +0.0f), gold },
+		{ XMFLOAT3(-0.9f, +0.0f, +0.0f), gold },
+		{ XMFLOAT3(-0.75f, +0.26f, +0.0f), gold },
+		{ XMFLOAT3(-0.6f, +0.52f, +0.0f), gold },
+	};
 
-	triangle = std::make_shared<Mesh>(vertices, 3, indices, 3, device, context);
+	unsigned int sierpinskiIndices[] = { 0, 1, 2, 1, 3, 4, 2, 4, 5 };
+
+	// Creating heart variables
+	Vertex heartVertices[] =
+	{
+		{ XMFLOAT3(+0.3f, +0.5f, +0.0f), red },
+		{ XMFLOAT3(+0.6f, +0.5f, +0.0f), red },
+		{ XMFLOAT3(+0.45f, +0.35f, +0.0f), red },
+		{ XMFLOAT3(+0.4f, +0.5f, +0.0f), red },
+		{ XMFLOAT3(+0.5f, +0.6f, +0.0f), red },
+		{ XMFLOAT3(+0.45f, +0.55f, +0.0f), red },
+		{ XMFLOAT3(+0.4f, +0.6f, +0.0f), red },
+	};
+
+	unsigned int heartIndices[] = { 0, 1, 2, 1, 3, 4, 3, 6, 5, 0, 6, 3 };
+
+	// Creating and populating the actual vector of mesh objects
+	meshes = std::vector<Mesh>();
+	meshes.push_back(Mesh(triangleVertices, 3, triangleIndices, 3, device, context));
+	meshes.push_back(Mesh(sierpinskiVertices, 6, sierpinskiIndices, 9, device, context));
+	meshes.push_back(Mesh(heartVertices, 7, heartIndices, 12, device, context));
 }
 
 
@@ -236,7 +251,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	triangle->Draw();
+	// Loops through each mesh in the game and tells it to draw itself
+	for(int i = 0; i < meshes.size(); i++) {
+		meshes[i].Draw();
+	}
+	
 
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME

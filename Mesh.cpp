@@ -4,6 +4,8 @@ Mesh::Mesh(Vertex* vertices, int vertexCount, unsigned int* indices, int indexCo
 	indexCount(indexCount),
 	context(context)
 {
+	// Below code mostly copied from Game.cpp starter code
+
 	{
 		// First, we need to describe the buffer we want Direct3D to make on the GPU
 		//  - Note that this variable is created on the stack since we only need it once
@@ -58,14 +60,14 @@ Mesh::~Mesh()
 {
 }
 
-ID3D11Buffer* Mesh::GetVertexBuffer()
+Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetVertexBuffer()
 {
-	return nullptr;
+	return vertexBuffer;
 }
 
-ID3D11Buffer* Mesh::GetIndexBuffer()
+Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetIndexBuffer()
 {
-	return nullptr;
+	return indexBuffer;
 }
 
 unsigned int Mesh::GetIndexCount()
@@ -75,6 +77,8 @@ unsigned int Mesh::GetIndexCount()
 
 void Mesh::Draw()
 {
+	// Below code mostly copied from Game.cpp starter code
+
 	// DRAW geometry
 	// - These steps are generally repeated for EACH object you draw
 	// - Other Direct3D calls will also be necessary to do more complex things
