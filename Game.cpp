@@ -201,9 +201,9 @@ void Game::CreateGeometry()
 		// Set up the vertices
 		Vertex vertices[] =
 		{
-			{ XMFLOAT3(+0.6f, +0.6f, +0.0f), blue },
-			{ XMFLOAT3(+0.8f, +0.6f, +0.0f), blue },
-			{ XMFLOAT3(+0.6f, +0.8f, +0.0f), red },
+			{ XMFLOAT3(+0.4f, +0.4f, +0.0f), blue },
+			{ XMFLOAT3(+0.8f, +0.4f, +0.0f), blue },
+			{ XMFLOAT3(+0.4f, +0.8f, +0.0f), red },
 			{ XMFLOAT3(+0.8f, +0.8f, +0.0f), red },
 		};
 
@@ -211,7 +211,7 @@ void Game::CreateGeometry()
 		unsigned int indices[] = { 0, 2, 1, 3, 1, 2 };
 
 		// Add in the mesh
-		meshes.push_back(std::make_shared<Mesh>(vertices, 4, indices, 3, device, context));
+		meshes.push_back(std::make_shared<Mesh>(vertices, 4, indices, 6, device, context));
 	}
 
 	// Create the third mesh (parallelogram)
@@ -219,17 +219,17 @@ void Game::CreateGeometry()
 		// Set up the vertices
 		Vertex vertices[] =
 		{
-			{ XMFLOAT3(+0.1f, +0.1f, +0.0f), blue },
-			{ XMFLOAT3(+0.3f, +0.3f, +0.0f), green },
-			{ XMFLOAT3(+0.1f, +0.7f, +0.0f), green },
-			{ XMFLOAT3(+0.3f, +0.9f, +0.0f), red },
+			{ XMFLOAT3(-0.9f, -0.9f, +0.0f), green },
+			{ XMFLOAT3(-0.7f, -0.7f, +0.0f), blue },
+			{ XMFLOAT3(-0.9f, +0.7f, +0.0f), red },
+			{ XMFLOAT3(-0.7f, +0.9f, +0.0f), green },
 		};
 
 		// Set up the indices
 		unsigned int indices[] = { 0, 2, 1, 3, 1, 2 };
 
 		// Add in the mesh
-		meshes.push_back(std::make_shared<Mesh>(vertices, 4, indices, 3, device, context));
+		meshes.push_back(std::make_shared<Mesh>(vertices, 4, indices, 6, device, context));
 	}
 }
 
@@ -278,31 +278,10 @@ void Game::Draw(float deltaTime, float totalTime)
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	{
-		// Set buffers in the input assembler (IA) stage
-		//  - Do this ONCE PER OBJECT, since each object may have different geometry
-		//  - For this demo, this step *could* simply be done once during Init()
-		//  - However, this needs to be done between EACH DrawIndexed() call
-		//     when drawing different geometry, so it's here as an example
-		// context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-		// context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-		// Tell Direct3D to draw
-		//  - Begins the rendering pipeline on the GPU
-		//  - Do this ONCE PER OBJECT you intend to draw
-		//  - This will use all currently set Direct3D resources (shaders, buffers, etc)
-		//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-		//     vertices in the currently set VERTEX BUFFER
-		// context->DrawIndexed(
-		// 	3,     // The number of indices to use (we could draw a subset if we wanted)
-		//	0,     // Offset to the first index we want to use
-		//	0);    // Offset to add to each index when looking up vertices
-
-		//for (unsigned int i = 0; i < meshes.size(); i++)
-		//{
-		//	meshes[i]->Draw();
-		//}
-
-		meshes[0].get()->Draw();
+		for (unsigned int i = 0; i < meshes.size(); i++)
+		{
+			meshes[i]->Draw();
+		}
 	}
 
 	// Frame END

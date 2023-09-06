@@ -48,7 +48,7 @@ Mesh::Mesh(
 
 		// Create the proper struct to hold the index data
 		D3D11_SUBRESOURCE_DATA res_IndexData = {};
-		res_IndexData.pSysMem = vertices; // pSysMem = Pointer to System Memory
+		res_IndexData.pSysMem = indices; // pSysMem = Pointer to System Memory
 
 		// Actually create the vertex buffer on the GPU (Output to check HRESULT Flag)
 		std::cout << device->CreateBuffer(&ibd, &res_IndexData, indexBuffer.GetAddressOf()) << std::endl;

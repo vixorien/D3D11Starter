@@ -33,11 +33,7 @@ private:
 	//     Component Object Model, which DirectX objects do
 	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
 
-	// Buffers to hold actual geometry data (redundant with mesh class)
-	/*Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;*/
-
-	// Objec
+	// Objects
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	
 	// Shaders and shader-related constructs
