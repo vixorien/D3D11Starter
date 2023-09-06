@@ -31,7 +31,7 @@ Mesh::Mesh(
 		D3D11_SUBRESOURCE_DATA res_VertexData = {};
 		res_VertexData.pSysMem = vertices; // pSysMem = Pointer to System Memory
 
-		// Actually create the vertex buffer on the GPU
+		// Actually create the vertex buffer on the GPU (Output to check HRESULT Flag)
 		std::cout << device->CreateBuffer(&vbd, &res_VertexData, vertexBuffer.GetAddressOf()) <<std::endl;
 	}
 	
@@ -50,7 +50,7 @@ Mesh::Mesh(
 		D3D11_SUBRESOURCE_DATA res_IndexData = {};
 		res_IndexData.pSysMem = vertices; // pSysMem = Pointer to System Memory
 
-		// Actually create the vertex buffer on the GPU
+		// Actually create the vertex buffer on the GPU (Output to check HRESULT Flag)
 		std::cout << device->CreateBuffer(&ibd, &res_IndexData, indexBuffer.GetAddressOf()) << std::endl;
 	}
 }
