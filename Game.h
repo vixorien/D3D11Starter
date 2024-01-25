@@ -3,6 +3,10 @@
 #include "DXCore.h"
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+// imgui
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_dx11.h"
+#include "imgui/imgui_impl_win32.h"
 
 class Game 
 	: public DXCore
@@ -20,10 +24,14 @@ public:
 	void Draw(float deltaTime, float totalTime);
 
 private:
+	float windowColor[4];
+	bool showDemo;
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
 	void CreateGeometry();
+	void RefreshImGui(float deltaTime);
+	void BuildUI();
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
