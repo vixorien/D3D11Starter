@@ -27,6 +27,12 @@ Game::Game(HINSTANCE hInstance)
 		false,				// Sync the framerate to the monitor refresh? (lock framerate)
 		true)				// Show extra stats (fps) in title bar?
 {
+	windowColor[0] = 0.1f;
+	windowColor[1] = 0.2f;
+	windowColor[2] = 0.3f;
+	windowColor[3] = 0.5f;
+	showDemo = true;
+
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
 	CreateConsoleWindow(500, 120, 32, 120);
@@ -47,6 +53,11 @@ Game::~Game()
 
 	// Call Release() on any Direct3D objects made within this class
 	// - Note: this is unnecessary for D3D objects stored in ComPtrs
+
+	// imgui
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 }
 
 // --------------------------------------------------------
@@ -82,6 +93,13 @@ void Game::Init()
 		context->VSSetShader(vertexShader.Get(), 0, 0);
 		context->PSSetShader(pixelShader.Get(), 0, 0);
 	}
+
+	// Initialize ImGui itself & platform/renderer backends
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplWin32_Init(hWnd);
+	ImGui_ImplDX11_Init(device.Get(), context.Get());
+	ImGui::StyleColorsDark();
 }
 
 // --------------------------------------------------------
@@ -248,6 +266,60 @@ void Game::CreateGeometry()
 	}
 }
 
+void Game::RefreshImGui(float deltaTime) {
+	// Put this all in a helper method that is called from Game::Update()
+	// Feed fresh data to ImGui
+	ImGuiIO& io = ImGui::GetIO();
+	io.DeltaTime = deltaTime;
+	io.DisplaySize.x = (float)this->windowWidth;
+	io.DisplaySize.y = (float)this->windowHeight;
+	// Reset the frame
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+	// Determine new input capture
+	Input& input = Input::GetInstance();
+	input.SetKeyboardCapture(io.WantCaptureKeyboard);
+	input.SetMouseCapture(io.WantCaptureMouse);
+	// Show the demo window
+	//ImGui::ShowDemoWindow();
+}
+
+void Game::BuildUI() {
+	ImGui::Begin("Assignment 2 Dear ImGui");
+
+	//static ImGuiTableFlags flags = ImGuiTableFlags_Hideable;
+	//ImGui::CheckboxFlags("Hideable", &flags, ImGuiTableFlags_Hideable);
+
+	// Replace the %f with the next parameter, and format as a float
+	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
+	// Replace each %d with the next parameter, and format as decimal integers
+	// The "x" will be printed as-is between the numbers, like so: 800x600
+	ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
+
+	// color picker
+	ImGui::ColorPicker4("Color Picker", windowColor);
+	// set window color
+	//ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, windowColor, ) // needs u32???
+
+	if (ImGui::Button("Hide/Show Demo", ImVec2(150, 50))) 
+	{
+		showDemo = !showDemo; 
+	}
+	//ImGui::ShowDemoWindow(&showDemo);
+		
+	if (showDemo)
+	{
+		ImGui::ShowDemoWindow();
+	}
+
+	ImGui::TextColored(ImVec4(1, 0.4, 0.3, 0.5), "Mouse x: %f", ImGui::GetIO().MousePos.x);
+	
+	static int wow;
+	ImGui::SliderInt("I slide", &wow, 0, 100);
+
+	ImGui::End();
+}
 
 // --------------------------------------------------------
 // Handle resizing to match the new window size.
@@ -265,6 +337,10 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	// update imgui
+	RefreshImGui(deltaTime);
+	BuildUI();
+
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
@@ -280,8 +356,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	// - At the beginning of Game::Draw() before drawing *anything*
 	{
 		// Clear the back buffer (erases what's on the screen)
-		const float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f }; // Cornflower Blue
-		context->ClearRenderTargetView(backBufferRTV.Get(), bgColor);
+		//const float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f }; // Cornflower Blue
+		context->ClearRenderTargetView(backBufferRTV.Get(), windowColor);
 
 		// Clear the depth buffer (resets per-pixel occlusion information)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -321,6 +397,10 @@ void Game::Draw(float deltaTime, float totalTime)
 		//  - Puts the results of what we've drawn onto the window
 		//  - Without this, the user never sees anything
 		bool vsyncNecessary = vsync || !deviceSupportsTearing || isFullscreen;
+
+		ImGui::Render(); // Turns this frame’s UI into renderable triangles
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
+
 		swapChain->Present(
 			vsyncNecessary ? 1 : 0,
 			vsyncNecessary ? 0 : DXGI_PRESENT_ALLOW_TEARING);
@@ -329,3 +409,4 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
 	}
 }
+
