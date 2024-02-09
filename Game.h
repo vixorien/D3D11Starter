@@ -3,11 +3,19 @@
 #include "DXCore.h"
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+// imgui
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_dx11.h"
+#include "imgui/imgui_impl_win32.h"
+
+#include <vector>
+#include "Mesh.h"
+#include <memory>
 
 class Game 
 	: public DXCore
 {
-
+	
 public:
 	Game(HINSTANCE hInstance);
 	~Game();
@@ -19,11 +27,23 @@ public:
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
 
+	// assignment 3
+	std::vector<std::shared_ptr<Mesh>> meshes;
+
+	// assignment 4
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
+
 private:
+	float windowColor[4];
+	bool showDemo;
+	float colorTint[4];
+	float offset[3];
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
 	void CreateGeometry();
+	void RefreshImGui(float deltaTime);
+	void BuildUI();
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
@@ -39,5 +59,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 
+	
 };
 
