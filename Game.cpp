@@ -2,6 +2,12 @@
 #include "Vertex.h"
 #include "Input.h"
 #include "PathHelpers.h"
+#include "BufferStruct.h"
+
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_dx11.h"
+#include "imgui/imgui_impl_win32.h"
 
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
@@ -27,6 +33,14 @@ Game::Game(HINSTANCE hInstance)
 		false,				// Sync the framerate to the monitor refresh? (lock framerate)
 		true)				// Show extra stats (fps) in title bar?
 {
+	// Assignment 2
+	windowColor[0] = 0.1f;
+	windowColor[1] = 0.2f;
+	windowColor[2] = 0.3f;
+	windowColor[3] = 0.5f;
+	showDemo = true;
+	//meshes = std::vector<std::shared_ptr<Mesh>>();
+
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
 	CreateConsoleWindow(500, 120, 32, 120);
@@ -47,6 +61,11 @@ Game::~Game()
 
 	// Call Release() on any Direct3D objects made within this class
 	// - Note: this is unnecessary for D3D objects stored in ComPtrs
+
+	// imgui
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 }
 
 // --------------------------------------------------------
@@ -60,7 +79,7 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	CreateGeometry();
-	
+
 	// Set initial graphics API state
 	//  - These settings persist until we change them
 	//  - Some of these, like the primitive topology & input layout, probably won't change
@@ -82,6 +101,33 @@ void Game::Init()
 		context->VSSetShader(vertexShader.Get(), 0, 0);
 		context->PSSetShader(pixelShader.Get(), 0, 0);
 	}
+
+	// Assignment 4
+	//constantBuffer = device->CreateBuffer()
+	{
+		unsigned int size = sizeof(TintAndOffset);
+		size = (size + 15) / 16 * 16;
+
+		// describe buffer and create it
+		D3D11_BUFFER_DESC cbDesc = {};
+		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cbDesc.ByteWidth = size;
+		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+		cbDesc.MiscFlags = 0;
+		cbDesc.StructureByteStride = 0;
+		device->CreateBuffer(&cbDesc, 0, constantBuffer.GetAddressOf());
+	
+		// activate constant buffer, bind it to where the shader expects
+		context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+	}
+
+	// Initialize ImGui itself & platform/renderer backends
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplWin32_Init(hWnd);
+	ImGui_ImplDX11_Init(device.Get(), context.Get());
+	ImGui::StyleColorsDark();
 }
 
 // --------------------------------------------------------
@@ -166,88 +212,138 @@ void Game::CreateGeometry()
 	XMFLOAT4 red	= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 green	= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	XMFLOAT4 blue	= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	XMFLOAT4 brightGreen = XMFLOAT4(0.65f, 1.0f, 0.0f, 1.0f);
+	XMFLOAT4 darkGreen = XMFLOAT4(0.0f, 0.30f, 0.02f, 1.0f);
+	XMFLOAT4 cyan = XMFLOAT4(0.0f, 0.75f, 1.0f, 1.0f);
 
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in CPU memory
-	//    over to a Direct3D-controlled data structure on the GPU (the vertex buffer)
-	// - Note: Since we don't have a camera or really any concept of
-	//    a "3d world" yet, we're simply describing positions within the
-	//    bounds of how the rasterizer sees our screen: [-1 to +1] on X and Y
-	// - This means (0,0) is at the very center of the screen.
-	// - These are known as "Normalized Device Coordinates" or "Homogeneous 
-	//    Screen Coords", which are ways to describe a position without
-	//    knowing the exact size (in pixels) of the image/window/etc.  
-	// - Long story short: Resizing the window also resizes the triangle,
-	//    since we're describing the triangle in terms of the window itself
 	Vertex vertices[] =
 	{
 		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
 		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
 		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
 	};
+	Vertex shape1[] = {
+		{XMFLOAT3(-0.25f, +0.25f, 0.0f), darkGreen},	// center
+		{XMFLOAT3(-0.35f, +0.3f, 0.0f), brightGreen},	// top left
+		{XMFLOAT3(-0.25f, +0.35f, 0.0f), brightGreen },	// top middle
+		{XMFLOAT3(-0.15f, +0.3f, 0.0f), brightGreen},	// top right
+		{XMFLOAT3(-0.15f, +0.15f, 0.0f), brightGreen},	// bottom right
+		{XMFLOAT3(-0.35f, +0.15f, 0.0f), brightGreen},	// bottom left
+	};
+	Vertex shape2[] = {
+		{XMFLOAT3(+0.7f, 0.0f, 0.0f), cyan},			// top left
+		{XMFLOAT3(+0.9f, -0.1f, 0.0f), brightGreen},	// top right
+		{XMFLOAT3(+0.15f, -0.9f, 0.0f), cyan},			// bottom left
+		{XMFLOAT3(+0.25f, -1.0f, 0.0f), brightGreen},	// bottom right
+	};
 
-	// Set up indices, which tell us which vertices to use and in which order
-	// - This is redundant for just 3 vertices, but will be more useful later
-	// - Indices are technically not required if the vertices are in the buffer 
-	//    in the correct order and each one will be used exactly once
-	// - But just to see how it's done...
 	unsigned int indices[] = { 0, 1, 2 };
+	unsigned int indices1[] = { 
+		0,1,2,	// center, up left, up middle
+		0,2,3,	// center, up middle, up right
+		0,3,4,	// center, up right, down right
+		0,4,5,	// center, down right, down left
+		0,5,1	// center, down left, up left
+	};
+	unsigned int indices2[] = { 
+		0,1,3,	// top left, top right, bottom right
+		0,3,2	// top left, bottom right, bottom left
+	};
 
 
-	// Create a VERTEX BUFFER
-	// - This holds the vertex data of triangles for a single object
-	// - This buffer is created on the GPU, which is where the data needs to
-	//    be if we want the GPU to act on it (as in: draw it to the screen)
-	{
-		// First, we need to describe the buffer we want Direct3D to make on the GPU
-		//  - Note that this variable is created on the stack since we only need it once
-		//  - After the buffer is created, this description variable is unnecessary
-		D3D11_BUFFER_DESC vbd	= {};
-		vbd.Usage				= D3D11_USAGE_IMMUTABLE;	// Will NEVER change
-		vbd.ByteWidth			= sizeof(Vertex) * 3;       // 3 = number of vertices in the buffer
-		vbd.BindFlags			= D3D11_BIND_VERTEX_BUFFER; // Tells Direct3D this is a vertex buffer
-		vbd.CPUAccessFlags		= 0;	// Note: We cannot access the data from C++ (this is good)
-		vbd.MiscFlags			= 0;
-		vbd.StructureByteStride = 0;
+	// assignment 3
+	std::shared_ptr<Mesh> s = std::make_shared<Mesh>(vertices, ARRAYSIZE(vertices), indices, ARRAYSIZE(indices), device);
+	std::shared_ptr<Mesh> s1 = std::make_shared<Mesh>(shape1, ARRAYSIZE(shape1), indices1, ARRAYSIZE(indices1), device);
+	std::shared_ptr<Mesh> s2 = std::make_shared<Mesh>(shape2, ARRAYSIZE(shape2), indices2, ARRAYSIZE(indices2), device);
 
-		// Create the proper struct to hold the initial vertex data
-		// - This is how we initially fill the buffer with data
-		// - Essentially, we're specifying a pointer to the data to copy
-		D3D11_SUBRESOURCE_DATA initialVertexData = {};
-		initialVertexData.pSysMem = vertices; // pSysMem = Pointer to System Memory
-
-		// Actually create the buffer on the GPU with the initial data
-		// - Once we do this, we'll NEVER CHANGE DATA IN THE BUFFER AGAIN
-		device->CreateBuffer(&vbd, &initialVertexData, vertexBuffer.GetAddressOf());
-	}
-
-	// Create an INDEX BUFFER
-	// - This holds indices to elements in the vertex buffer
-	// - This is most useful when vertices are shared among neighboring triangles
-	// - This buffer is created on the GPU, which is where the data needs to
-	//    be if we want the GPU to act on it (as in: draw it to the screen)
-	{
-		// Describe the buffer, as we did above, with two major differences
-		//  - Byte Width (3 unsigned integers vs. 3 whole vertices)
-		//  - Bind Flag (used as an index buffer instead of a vertex buffer) 
-		D3D11_BUFFER_DESC ibd	= {};
-		ibd.Usage				= D3D11_USAGE_IMMUTABLE;	// Will NEVER change
-		ibd.ByteWidth			= sizeof(unsigned int) * 3;	// 3 = number of indices in the buffer
-		ibd.BindFlags			= D3D11_BIND_INDEX_BUFFER;	// Tells Direct3D this is an index buffer
-		ibd.CPUAccessFlags		= 0;	// Note: We cannot access the data from C++ (this is good)
-		ibd.MiscFlags			= 0;
-		ibd.StructureByteStride = 0;
-
-		// Specify the initial data for this buffer, similar to above
-		D3D11_SUBRESOURCE_DATA initialIndexData = {};
-		initialIndexData.pSysMem = indices; // pSysMem = Pointer to System Memory
-
-		// Actually create the buffer with the initial data
-		// - Once we do this, we'll NEVER CHANGE THE BUFFER AGAIN
-		device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
-	}
+	meshes.push_back(s);
+	meshes.push_back(s1);
+	meshes.push_back(s2);
 }
 
+void Game::RefreshImGui(float deltaTime) {
+	// Put this all in a helper method that is called from Game::Update()
+	// Feed fresh data to ImGui
+	ImGuiIO& io = ImGui::GetIO();
+	io.DeltaTime = deltaTime;
+	io.DisplaySize.x = (float)this->windowWidth;
+	io.DisplaySize.y = (float)this->windowHeight;
+	// Reset the frame
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+	// Determine new input capture
+	Input& input = Input::GetInstance();
+	input.SetKeyboardCapture(io.WantCaptureKeyboard);
+	input.SetMouseCapture(io.WantCaptureMouse);
+	// Show the demo window
+	//ImGui::ShowDemoWindow();
+}
+
+void Game::BuildUI() {
+	ImGui::Begin("Assignment 2 Dear ImGui");
+
+	//static ImGuiTableFlags flags = ImGuiTableFlags_Hideable;
+	//ImGui::CheckboxFlags("Hideable", &flags, ImGuiTableFlags_Hideable);
+
+	// Replace the %f with the next parameter, and format as a float
+	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
+	// Replace each %d with the next parameter, and format as decimal integers
+	// The "x" will be printed as-is between the numbers, like so: 800x600
+	ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
+
+	// color picker
+	ImGui::ColorPicker4("Color Picker", windowColor);
+	// set window color
+	//ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, windowColor, ) // needs u32???
+
+	if (ImGui::Button("Hide/Show Demo", ImVec2(150, 50))) 
+	{
+		showDemo = !showDemo; 
+	}
+	//ImGui::ShowDemoWindow(&showDemo);
+		
+	if (showDemo)
+	{
+		ImGui::ShowDemoWindow();
+	}
+
+	ImGui::TextColored(ImVec4(1, 0.4, 0.3, 0.5), "Mouse x: %f", ImGui::GetIO().MousePos.x);
+	
+	static int wow;
+	ImGui::SliderInt("I slide", &wow, 0, 100);
+
+	//
+	// Assignment 3
+	//
+	//ImGui::TreeNode("Assignment 3");
+	//ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+	//ImGui::TreeNode("Mesh 1: Triangle");
+	int m1 = meshes[0]->GetVertexCount();
+	int tris1 = m1 / 3;
+	ImGui::Text("Mesh 1 Vertices: %i    Triangles: %i", m1, tris1);
+	//ImGui::TreePop();
+
+	int m2 = meshes[1]->GetVertexCount();
+	int tris2 = m2 / 3;
+	//ImGui::TreeNode("Mesh 2: Pentagram");
+	ImGui::Text("Mesh 2 Vertices: %i    Triangles: %i", m2, tris2);
+	//ImGui::TreePop();
+
+	int m3 = meshes[2]->GetVertexCount();
+	int tris3 = m3 / 3;
+	//ImGui::TreeNode("Mesh 3: Rect");
+	ImGui::Text("Mesh 3 Vertices: %i    Triangles: %i", m3, tris3);
+	//ImGui::TreePop();
+
+	//ImGui::TreePop();
+
+	// Assignment 4
+	ImGui::ColorPicker4("Color Tint Picker", colorTint);
+	ImGui::DragFloat3("Offset", offset);
+
+	ImGui::End();
+}
 
 // --------------------------------------------------------
 // Handle resizing to match the new window size.
@@ -265,6 +361,10 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	// update imgui
+	RefreshImGui(deltaTime);
+	BuildUI();
+
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
@@ -280,37 +380,32 @@ void Game::Draw(float deltaTime, float totalTime)
 	// - At the beginning of Game::Draw() before drawing *anything*
 	{
 		// Clear the back buffer (erases what's on the screen)
-		const float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f }; // Cornflower Blue
-		context->ClearRenderTargetView(backBufferRTV.Get(), bgColor);
+		//const float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f }; // Cornflower Blue
+		context->ClearRenderTargetView(backBufferRTV.Get(), windowColor);
 
 		// Clear the depth buffer (resets per-pixel occlusion information)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// DRAW geometry
-	// - These steps are generally repeated for EACH object you draw
-	// - Other Direct3D calls will also be necessary to do more complex things
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	{
-		// Set buffers in the input assembler (IA) stage
-		//  - Do this ONCE PER OBJECT, since each object may have different geometry
-		//  - For this demo, this step *could* simply be done once during Init()
-		//  - However, this needs to be done between EACH DrawIndexed() call
-		//     when drawing different geometry, so it's here as an example
-		context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-		context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	// Assignment 4
+	// check back to notes
+	TintAndOffset vsData;
+	
+	vsData.colorTint = DirectX::XMFLOAT4(colorTint);
+	vsData.offset = DirectX::XMFLOAT3(offset);
 
-		// Tell Direct3D to draw
-		//  - Begins the rendering pipeline on the GPU
-		//  - Do this ONCE PER OBJECT you intend to draw
-		//  - This will use all currently set Direct3D resources (shaders, buffers, etc)
-		//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-		//     vertices in the currently set VERTEX BUFFER
-		context->DrawIndexed(
-			3,     // The number of indices to use (we could draw a subset if we wanted)
-			0,     // Offset to the first index we want to use
-			0);    // Offset to add to each index when looking up vertices
+	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
+	context->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+
+	// set color & offset
+	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
+	
+	context->Unmap(constantBuffer.Get(), 0);
+
+	// copied from demo
+	for (auto& m : meshes)
+	{
+		m->Draw(context);
 	}
 
 	// Frame END
@@ -321,6 +416,10 @@ void Game::Draw(float deltaTime, float totalTime)
 		//  - Puts the results of what we've drawn onto the window
 		//  - Without this, the user never sees anything
 		bool vsyncNecessary = vsync || !deviceSupportsTearing || isFullscreen;
+
+		ImGui::Render(); // Turns this frame’s UI into renderable triangles
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
+
 		swapChain->Present(
 			vsyncNecessary ? 1 : 0,
 			vsyncNecessary ? 0 : DXGI_PRESENT_ALLOW_TEARING);
@@ -329,3 +428,4 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
 	}
 }
+
